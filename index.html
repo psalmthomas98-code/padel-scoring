@@ -374,6 +374,10 @@ body {
 .admin-match.is-live { border-color: var(--fire); box-shadow: 0 0 0 1px var(--fire), 0 4px 20px rgba(244,107,26,.15); }
 .admin-match.is-done { opacity: 0.6; }
 .match-header { display: flex; align-items: center; gap: 10px; }
+.match-order-btns { display:flex; gap:3px; margin-left:auto; flex-shrink:0; }
+.order-btn { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.5); width:28px; height:28px; border-radius:4px; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s; }
+.order-btn:hover:not(:disabled) { background:rgba(244,107,26,.2); border-color:var(--fire); color:var(--fire); }
+.order-btn:disabled { opacity:.2; cursor:default; }
 .match-num { font-size: 10px; color: var(--muted); font-weight: 700; background: var(--raised); border-radius: 4px; padding: 3px 7px; flex-shrink: 0; }
 .admin-teams { flex: 1; font-size: 14px; line-height: 1.5; min-width: 0; overflow-wrap: anywhere; }
 .admin-teams strong { font-weight: 700; color: var(--chalk); }
@@ -908,7 +912,7 @@ async function pushToServer() {
   syncStatus='saving'; updateSyncDots();
   try {
     const res=await fetch(dbPath(),{method:'PUT',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({results:S.results,live:S.live,ko:S.ko,sponsors:S.sponsors,names:S.names,players:S.players,presentation:S.presentation,displayTab:S.displayTab})});
+      body:JSON.stringify({results:S.results,live:S.live,ko:S.ko,sponsors:S.sponsors,names:S.names,players:S.players,presentation:S.presentation,displayTab:S.displayTab,matchOrder:S.matchOrder,logoutSerial:S.logoutSerial})});
     if(!res.ok) throw new Error(res.status);
     syncStatus='ok';
   } catch { syncStatus='error'; }
@@ -934,6 +938,10 @@ function startRealtime() {
     S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames(); S.players=data.players||defaultPlayers();
     S.presentation=data.presentation||{mode:'standard',matchId:''};
     if(!S.adminOpen) S.displayTab=data.displayTab||'groups';
+    S.matchOrder=data.matchOrder||{};
+    const newSerial=data.logoutSerial||0;
+    if(S.authed && localStorage.getItem(AUTH_KEY)!==String(newSerial)){ clearLocalAuth(); }
+    S.logoutSerial=newSerial;
     syncStatus='ok'; updateSyncDots();
     try {
       document.getElementById('root').innerHTML=renderDisplay();
@@ -981,8 +989,19 @@ const S = {
   authed:false, adminOpen:false, adminGroup:'A', adminTab:'group', displayTab:'groups',
   showPIN:false, pinError:'', showTourPicker:false,
   results:{}, live:null, liveHistory:[],
-  ko:freshKO(), sponsors:[], names:defaultNames(), players:defaultPlayers(), presentation:{mode:'standard',matchId:''}
+  ko:freshKO(), sponsors:[], names:defaultNames(), players:defaultPlayers(),
+  presentation:{mode:'standard',matchId:''}, matchOrder:{}, logoutSerial:0
 };
+const AUTH_KEY='padel_admin_v1';
+function checkPersistedAuth(serial){ if(localStorage.getItem(AUTH_KEY)===String(serial)) S.authed=true; }
+function persistAuth(serial){ localStorage.setItem(AUTH_KEY,String(serial)); }
+function clearLocalAuth(){ localStorage.removeItem(AUTH_KEY); S.authed=false; }
+function getGroupMatches(gk){
+  const all=MATCHES.filter(m=>m.group===gk);
+  const order=S.matchOrder?.[gk];
+  if(!order||!order.length) return all;
+  return [...all].sort((a,b)=>{const ai=order.indexOf(a.id),bi=order.indexOf(b.id);return(ai<0?999:ai)-(bi<0?999:bi);});
+}
 function getTeam(gk,idx){
   if(S.players[gk]&&S.players[gk][idx]){
     const{p1,p2}=S.players[gk][idx];
@@ -1163,7 +1182,7 @@ function renderWinnerDisplay(details){
 function renderUpcoming(){
   const liveId=S.live?.matchId;
   // Group stage: unplayed, non-live matches
-  const upcoming=MATCHES.filter(m=>!S.results[m.id]&&m.id!==liveId).slice(0,5);
+  const upcoming=Object.keys(GROUPS).flatMap(gk=>getGroupMatches(gk)).filter(m=>!S.results[m.id]&&m.id!==liveId).slice(0,5);
   if(!upcoming.length) return '';
   const rows=upcoming.map(m=>{
     const g=GROUPS[m.group];
@@ -1458,7 +1477,7 @@ function renderGroupAdmin(g,standings){
   return`
   <div class="admin-group-info">${g.date} · ${g.time}</div>
   <div class="admin-match-list">
-    ${MATCHES.filter(m=>m.group===S.adminGroup).map((m,i)=>renderAdminMatch(m,i+1)).join('')}
+    ${(()=>{const ms=getGroupMatches(S.adminGroup);return ms.map((m,i)=>renderAdminMatch(m,i+1,ms.length)).join('');})()}
   </div>
   <div class="admin-standings">
     <div class="admin-standings-title">Standings — ${g.label}</div>
@@ -1539,7 +1558,7 @@ function renderKOAdminMatch(id,idx){
 </div>`;
 }
 
-function renderAdminMatch(m,idx){
+function renderAdminMatch(m,idx,total){
   const t1=getTeam(m.group,m.t1),t2=getTeam(m.group,m.t2),res=S.results[m.id],L=S.live;
   const isLive=L&&L.matchId===m.id,isDone=!!res;
   const badge=isLive?`<span class="match-badge badge-live">● Live</span>`:isDone?`<span class="match-badge badge-done">✓ Done</span>`:`<span class="match-badge badge-pending">Upcoming</span>`;
@@ -1577,6 +1596,10 @@ function renderAdminMatch(m,idx){
     <span class="match-num">#${idx}</span>
     <div class="admin-teams"><strong>${t1}</strong><div class="vs">vs</div><strong>${t2}</strong></div>
     ${badge}
+    <div class="match-order-btns">
+      <button class="order-btn" data-action="moveMatchUp" data-id="${m.id}" ${idx===1?'disabled':''}>↑</button>
+      <button class="order-btn" data-action="moveMatchDown" data-id="${m.id}" ${idx===total?'disabled':''}>↓</button>
+    </div>
   </div>
   ${body}
 </div>`;
@@ -1623,6 +1646,7 @@ function renderAdminPanel(){
     </div>
     <div class="admin-topbar-right">
       <button class="admin-hdr-btn" data-action="openPicker">⇄ Switch</button>
+      <button class="admin-hdr-btn" style="border-color:rgba(224,82,82,.4);color:var(--loss)" data-action="logoutAll">⊗ Logout All</button>
       <button class="admin-hdr-btn close" data-action="closeAdmin">✕ Close</button>
     </div>
   </div>
@@ -1668,13 +1692,25 @@ function attachHandlers(){
       if(a==='closePIN')   {S.showPIN=false;render();}
       if(a==='submitPIN')  {
         const val=document.getElementById('pin-field')?.value||'';
-        if(val===ADMIN_PIN){S.authed=true;S.showPIN=false;S.adminOpen=true;S.pinError='';render();}
+        if(val===ADMIN_PIN){S.authed=true;S.showPIN=false;S.adminOpen=true;S.pinError='';persistAuth(S.logoutSerial);render();}
         else{S.pinError='Incorrect PIN';document.getElementById('pin-error').textContent=S.pinError;document.getElementById('pin-field').value='';document.getElementById('pin-field').focus();}
       }
-      if(a==='lockAdmin')  {S.authed=false;S.adminOpen=false;renderOverlays();}
+      if(a==='lockAdmin')  {clearLocalAuth();S.adminOpen=false;renderOverlays();}
+      if(a==='logoutAll')  {S.logoutSerial=(S.logoutSerial||0)+1;clearLocalAuth();S.adminOpen=false;scheduleSave();render();}
       if(a==='openAdmin')  {S.adminOpen=true;renderOverlays();}
       if(a==='closeAdmin') {S.adminOpen=false;renderOverlays();}
       if(a==='setGroup')   {S.adminGroup=el.dataset.group;S.adminTab='group';render();}
+      if(a==='moveMatchUp'||a==='moveMatchDown'){
+        const gk=S.adminGroup;
+        const ms=getGroupMatches(gk);
+        const ids=ms.map(m=>m.id);
+        const i=ids.indexOf(el.dataset.id);
+        if(a==='moveMatchUp'&&i>0){[ids[i-1],ids[i]]=[ids[i],ids[i-1]];}
+        if(a==='moveMatchDown'&&i<ids.length-1){[ids[i],ids[i+1]]=[ids[i+1],ids[i]];}
+        if(!S.matchOrder) S.matchOrder={};
+        S.matchOrder[gk]=ids;
+        scheduleSave();render();
+      }
       if(a==='setKOTab')   {S.adminTab='knockout';render();}
       if(a==='setWNTab')   {S.adminTab='winners';render();}
       if(a==='setPLTab')   {S.adminTab='players';render();}
@@ -1733,7 +1769,14 @@ function renderOverlays(){
 // ── INIT ──────────────────────────────────────────────────────────────────────
 (async()=>{
   const data=await pullFromServer();
-  if(data){S.results=data.results||{};S.live=data.live ? Object.assign({setWinner:null,adv:null},data.live) : null;S.ko=data.ko||freshKO();S.sponsors=data.sponsors||[];S.names=data.names||defaultNames();S.players=data.players||defaultPlayers();S.presentation=data.presentation||{mode:'standard',matchId:''};S.displayTab=data.displayTab||'groups';}
+  if(data){
+    S.results=data.results||{};
+    S.live=data.live ? Object.assign({setWinner:null,adv:null},data.live) : null;
+    S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames();
+    S.players=data.players||defaultPlayers(); S.presentation=data.presentation||{mode:'standard',matchId:''};
+    S.displayTab=data.displayTab||'groups'; S.matchOrder=data.matchOrder||{};
+    S.logoutSerial=data.logoutSerial||0; checkPersistedAuth(S.logoutSerial);
+  }
   render();
 })();
 </script>
