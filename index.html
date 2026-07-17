@@ -880,7 +880,7 @@ async function pushToServer() {
   syncStatus='saving'; updateSyncDots();
   try {
     const res=await fetch(dbPath(),{method:'PUT',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({results:S.results,live:S.live,ko:S.ko,sponsors:S.sponsors,names:S.names,players:S.players,presentation:S.presentation})});
+      body:JSON.stringify({results:S.results,live:S.live,ko:S.ko,sponsors:S.sponsors,names:S.names,players:S.players,presentation:S.presentation,displayTab:S.displayTab})});
     if(!res.ok) throw new Error(res.status);
     syncStatus='ok';
   } catch { syncStatus='error'; }
@@ -905,6 +905,7 @@ function startRealtime() {
     S.live=data.live ? Object.assign({setWinner:null,adv:null},data.live) : null;
     S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames(); S.players=data.players||defaultPlayers();
     S.presentation=data.presentation||{mode:'standard',matchId:''};
+    if(!S.adminOpen) S.displayTab=data.displayTab||'groups';
     syncStatus='ok'; updateSyncDots();
     try {
       document.getElementById('root').innerHTML=renderDisplay();
@@ -1637,7 +1638,7 @@ function attachHandlers(){
       if(a==='setWNTab')   {S.adminTab='winners';render();}
       if(a==='setPLTab')   {S.adminTab='players';render();}
       if(a==='setSPTab')   {S.adminTab='sponsors';render();}
-      if(a==='dispTab')    {S.displayTab=el.dataset.tab;render();}
+      if(a==='dispTab')    {S.displayTab=el.dataset.tab;scheduleSave();render();}
       if(a==='openPicker') {S.showTourPicker=true;render();}
       if(a==='closePicker'){S.showTourPicker=false;render();}
       if(a==='pickTour')   {S.showTourPicker=false;await switchTournament(el.dataset.id);}
@@ -1695,7 +1696,7 @@ function renderOverlays(){
 // ── INIT ──────────────────────────────────────────────────────────────────────
 (async()=>{
   const data=await pullFromServer();
-  if(data){S.results=data.results||{};S.live=data.live||null;S.ko=data.ko||freshKO();S.sponsors=data.sponsors||[];S.names=data.names||defaultNames();S.presentation=data.presentation||{mode:'standard',matchId:''};}
+  if(data){S.results=data.results||{};S.live=data.live ? Object.assign({setWinner:null,adv:null},data.live) : null;S.ko=data.ko||freshKO();S.sponsors=data.sponsors||[];S.names=data.names||defaultNames();S.players=data.players||defaultPlayers();S.presentation=data.presentation||{mode:'standard',matchId:''};S.displayTab=data.displayTab||'groups';}
   render();
 })();
 </script>
