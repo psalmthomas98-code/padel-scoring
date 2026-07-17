@@ -1021,6 +1021,74 @@ input { font: inherit; }
   .d-clock { font-size: 23px; }
 }
 
+/* ── DISPLAY VERTICAL FIT + TWO-COLUMN FIXTURES ────────────────────────────── */
+.d-live-zone {
+  min-height: 250px;
+  padding-block: clamp(10px, 1.8vh, 18px);
+}
+.d-live-board {
+  padding: clamp(13px, 1.6vw, 20px) clamp(18px, 2.5vw, 34px) 12px;
+}
+.d-live-eyebrow { margin-bottom: 6px; }
+.d-score-layout {
+  min-height: 142px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, .7fr) minmax(0, 1fr);
+  align-items: center;
+}
+.d-team-block { align-self: center; justify-content: center; }
+.d-score-center { min-width: 0; justify-content: center; }
+.d-point-label { margin-bottom: 4px; }
+.d-point-num {
+  min-width: clamp(58px, 6vw, 82px);
+  font-size: clamp(54px, 6.5vw, 88px);
+  line-height: .86;
+}
+.d-point-dash { font-size: clamp(36px, 4.4vw, 58px); }
+.d-game-row {
+  min-width: 138px;
+  margin-top: 6px;
+  padding: 6px 10px 0;
+}
+.d-live-footer { margin-top: 7px; padding-top: 7px; }
+
+.d-upcoming-zone { padding: 7px clamp(16px, 3.2vw, 48px) 8px; }
+.d-upcoming-header { margin-bottom: 6px; }
+.d-upcoming-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 10px;
+}
+.d-up-row { min-width: 0; min-height: 38px; padding: 6px 10px; }
+.d-up-teams { min-width: 0; flex-wrap: nowrap; font-size: 11px; }
+.d-up-teams > span:not(.d-up-vs) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.d-up-time { font-size: 8px; }
+
+.d-results-wrap {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-height: none;
+  overflow: visible;
+}
+.d-result-row { min-width: 0; min-height: 20px; padding: 3px 7px; }
+.d-result-row:nth-child(odd) { border-right: 1px solid rgba(255,255,255,.045); }
+
+@media (max-width: 760px), (max-height: 560px) {
+  .d-live-zone { min-height: 0; }
+  .d-score-layout { min-height: 118px; grid-template-columns: minmax(0,1fr) minmax(112px,.7fr) minmax(0,1fr); }
+  .d-point-num { min-width: 40px; font-size: clamp(40px,12vw,62px); }
+  .d-point-dash { font-size: 30px; }
+  .d-game-row { min-width: 100px; margin-top: 4px; padding-top: 4px; }
+  .d-live-footer { margin-top: 5px; padding-top: 6px; }
+  .d-upcoming-zone { padding: 8px 14px; }
+  .d-upcoming-list { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+  .d-score-layout { min-height: 108px; grid-template-columns: minmax(0,1fr) 102px minmax(0,1fr); }
+  .d-results-wrap { grid-template-columns: 1fr; }
+  .d-result-row:nth-child(odd) { border-right: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1353,7 +1421,7 @@ function renderWinnerDisplay(details){
 function renderUpcoming(){
   const liveId=S.live?.matchId;
   // Group stage: unplayed, non-live matches
-  const upcoming=Object.keys(GROUPS).flatMap(gk=>getGroupMatches(gk)).filter(m=>!S.results[m.id]&&m.id!==liveId).slice(0,5);
+  const upcoming=Object.keys(GROUPS).flatMap(gk=>getGroupMatches(gk)).filter(m=>!S.results[m.id]&&m.id!==liveId).slice(0,6);
   if(!upcoming.length) return '';
   const rows=upcoming.map(m=>{
     const g=GROUPS[m.group];
