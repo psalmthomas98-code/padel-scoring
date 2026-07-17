@@ -941,11 +941,18 @@ function defaultNames(){
   for(const [k,g] of Object.entries(GROUPS)) n[k]=[...g.teams];
   return n;
 }
+function defaultPlayers(){
+  const p={};
+  for(const [k,g] of Object.entries(GROUPS)){
+    p[k]=g.teams.map(t=>{const[p1,...rest]=t.split(' & ');return{p1:p1.trim(),p2:(rest.join(' & ')||'').trim()};});
+  }
+  return p;
+}
 const S = {
   authed:false, adminOpen:false, adminGroup:'A', adminTab:'group', displayTab:'groups',
   showPIN:false, pinError:'', showTourPicker:false,
   results:{}, live:null, liveHistory:[],
-  ko:freshKO(), sponsors:[], names:defaultNames(), presentation:{mode:'standard',matchId:''}
+  ko:freshKO(), sponsors:[], names:defaultNames(), players:defaultPlayers(), presentation:{mode:'standard',matchId:''}
 };
 function getTeam(gk,idx){ return (S.names[gk]&&S.names[gk][idx])||GROUPS[gk].teams[idx]; }
 function freshLive(id) {
