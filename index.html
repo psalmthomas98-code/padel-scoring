@@ -1780,15 +1780,7 @@ function renderAdminMatch(m,idx,total){
 }
 
 // ── FAB ───────────────────────────────────────────────────────────────────────
-function renderFAB(){
-  // Admin button now lives in the banner; FAB only shows Lock when authed
-  if(S.authed){
-    return`<div class="mode-fab">
-      <button class="fab-btn lock" data-action="lockAdmin">🔒 Lock</button>
-    </div>`;
-  }
-  return '';
-}
+function renderFAB(){ return ''; }
 
 // ── PIN MODAL ─────────────────────────────────────────────────────────────────
 function renderPINModal(){
