@@ -2,8 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
 <title>Udaan Padel Open — Live Scoring</title>
+<meta name="theme-color" content="#0b0e12" />
+<meta name="application-name" content="Udaan Padel Open" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Udaan Padel" />
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
+<link rel="manifest" href="manifest.webmanifest" />
 <style>
 /* ── DARK BASE (admin) ── */
 :root {
@@ -377,7 +387,14 @@ body {
 }
 .d-banner-left,
 .d-banner-right { min-width: 0; }
-.d-banner-left svg { flex: 0 0 auto; }
+.d-banner-left .brand-logo {
+  display: block;
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  border-radius: 10px;
+}
 .d-banner-title {
   font-size: clamp(22px, 2.6vw, 38px);
   letter-spacing: clamp(2px, .32vw, 5px);
@@ -501,7 +518,7 @@ body {
 
 @media (max-width: 1020px) {
   .d-banner { min-height: 72px; }
-  .d-banner-left svg { width: 38px; height: auto; }
+  .d-banner-left .brand-logo { width: 38px; height: 38px; }
   .d-banner-title { font-size: clamp(20px, 3vw, 30px); }
   .d-banner-sub { max-width: 42vw; }
   .d-score-layout { grid-template-columns: minmax(0, 1fr) minmax(220px, .72fr) minmax(0, 1fr); }
@@ -519,7 +536,7 @@ body {
   }
   .d-banner { align-items: flex-start; flex-wrap: wrap; min-height: auto; padding: 10px 14px; }
   .d-banner-left { width: 100%; }
-  .d-banner-left svg { width: 34px; }
+  .d-banner-left .brand-logo { width: 34px; height: 34px; }
   .d-banner-title { font-size: clamp(19px, 5.5vw, 28px); white-space: normal; }
   .d-banner-sub { max-width: 80vw; font-size: 8px; }
   .d-banner-right { width: 100%; justify-content: space-between; }
@@ -553,10 +570,257 @@ body {
   .d-point-dash { font-size: 28px; }
   .d-standings-grid { grid-template-columns: 1fr; }
 }
+
+/* ── PHONE + LAPTOP COMPATIBILITY ─────────────────────────────────────────── */
+html {
+  width: 100%;
+  min-height: 100%;
+  background: var(--pitch);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  width: 100%;
+  min-width: 320px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+button,
+input,
+label { touch-action: manipulation; }
+button,
+input { font: inherit; }
+#admin-view {
+  width: 100%;
+  height: 100dvh;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-right: max(16px, env(safe-area-inset-right));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  padding-left: max(16px, env(safe-area-inset-left));
+  overscroll-behavior-y: contain;
+}
+.admin-standings {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.admin-st-table { min-width: 520px; }
+.admin-match,
+.sp-row { max-width: 100%; }
+.admin-teams { overflow-wrap: anywhere; }
+.mode-fab {
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 761px) and (max-width: 900px) {
+  body { height: auto; min-height: 100dvh; overflow-y: auto; }
+  #display-view {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    grid-template-rows: auto auto auto auto;
+  }
+  .d-banner { flex-wrap: wrap; }
+  .d-banner-right { margin-left: auto; }
+  .d-live-zone { padding-block: 18px; }
+  .d-standings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .d-ko-grid { grid-template-columns: 1fr; }
+  .d-ko-body { min-height: 140px; }
+}
+
+@media (max-width: 820px), (max-height: 560px) {
+  #admin-view {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-bottom: max(80px, calc(env(safe-area-inset-bottom) + 68px));
+    padding-left: max(12px, env(safe-area-inset-left));
+  }
+  .admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    align-items: flex-start;
+    margin: -12px -12px 14px;
+    padding: max(12px, env(safe-area-inset-top)) 12px 12px;
+    background: rgba(11,14,18,.96);
+    border-bottom-color: rgba(244,107,26,.28);
+    backdrop-filter: blur(12px);
+  }
+  .admin-topbar > div:first-child { min-width: 0; }
+  .admin-title { font-size: 18px; }
+  .admin-topbar-right {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    width: 100%;
+    gap: 8px;
+  }
+  .admin-topbar-right .sync-status { grid-column: 1 / -1; }
+  .admin-topbar-right .act-btn {
+    min-height: 44px;
+    padding-inline: 10px;
+    white-space: normal;
+  }
+  .admin-group-tabs {
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin-right: -12px;
+    margin-left: -12px;
+    padding: 0 12px 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .admin-group-tabs::-webkit-scrollbar { display: none; }
+  .atab {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 9px 16px;
+    scroll-snap-align: start;
+  }
+  .admin-group-info {
+    margin-bottom: 12px;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .admin-match-list { gap: 10px; margin-bottom: 20px; }
+  .admin-match {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 14px;
+  }
+  .match-num { grid-column: 1; min-width: 18px; }
+  .admin-teams { grid-column: 2; min-width: 0; font-size: 14px; }
+  .match-badge { grid-column: 3; }
+  .live-scoring-ctrl {
+    grid-column: 1 / -1;
+    width: 100%;
+    align-items: stretch;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .score-summary { justify-content: center; }
+  .score-summary .set-score { font-size: 28px; }
+  .score-summary .game-pts { font-size: 18px; }
+  .point-btns { width: 100%; }
+  .point-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 54px;
+    padding: 10px 8px;
+    font-size: 12px;
+    white-space: normal;
+  }
+  .ctrl-sep { flex: 0 0 26px; text-align: center; }
+  .done-score {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 8px;
+    background: var(--raised);
+    border: 1px solid var(--border);
+  }
+  .match-actions {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    width: 100%;
+    gap: 8px;
+  }
+  .match-actions .act-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    padding: 9px 8px;
+    white-space: normal;
+  }
+  .admin-standings {
+    margin-right: -12px;
+    margin-left: -12px;
+    padding: 0 12px 8px;
+  }
+  .admin-st-table { min-width: 500px; }
+  .admin-st-table th { padding: 7px 8px; }
+  .admin-st-table td { padding: 9px 8px; }
+  .ko-admin-top { align-items: stretch; }
+  .ko-admin-top > div { width: 100%; }
+  .ko-admin-top .btn-autofill { width: 100%; min-height: 44px; }
+  .ko-seeding-note { line-height: 1.55; }
+  .sp-row {
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+  }
+  .sp-preview { grid-column: 1; grid-row: 1 / span 2; width: 80px; height: 54px; }
+  .sp-input { grid-column: 2 / -1; width: 100%; min-width: 0; min-height: 42px; }
+  .sp-upload-btn { min-height: 42px; padding: 10px; text-align: center; }
+  .sp-remove { min-width: 42px; min-height: 42px; }
+  .sp-add { width: 100%; min-height: 46px; }
+  .modal-overlay {
+    align-items: flex-end;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+  .modal-box {
+    max-height: min(88dvh, 680px);
+    padding: 24px 20px;
+    overflow-y: auto;
+  }
+  .tour-item,
+  .modal-btn { min-height: 48px; }
+}
+
+@media (max-width: 520px) {
+  .admin-topbar > div:first-child { width: 100%; }
+  .admin-topbar-right { grid-template-columns: 1fr 1fr; }
+  .admin-match { grid-template-columns: auto minmax(0, 1fr); }
+  .match-badge { grid-column: 1 / -1; justify-self: start; }
+  .sp-row { grid-template-columns: 64px minmax(0, 1fr) auto; }
+  .sp-preview { width: 64px; }
+  .d-results-wrap { max-height: none; }
+  .d-sponsors {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .d-sponsor-item { flex: 0 0 auto; }
+}
+
+@media (pointer: coarse) {
+  .fab-btn,
+  .dstab,
+  .atab,
+  .act-btn,
+  .point-btn,
+  .sp-upload-btn,
+  .sp-remove,
+  .sp-add { min-height: 44px; }
+  #display-view + .mode-fab .fab-btn { opacity: .62; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="root"></div><div id="overlays"></div>
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const FIREBASE_URL = 'https://padel-scoring-58d86-default-rtdb.asia-southeast1.firebasedatabase.app';
@@ -605,7 +869,7 @@ async function pushToServer() {
   syncStatus='saving'; updateSyncDots();
   try {
     const res=await fetch(dbPath(),{method:'PUT',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({results:S.results,live:S.live,ko:S.ko,sponsors:S.sponsors})});
+      body:JSON.stringify({results:S.results,live:S.live,ko:S.ko,sponsors:S.sponsors,names:S.names})});
     if(!res.ok) throw new Error(res.status);
     syncStatus='ok';
   } catch { syncStatus='error'; }
@@ -626,9 +890,9 @@ function startRealtime() {
     // If admin has a live match in progress, don't let SSE overwrite local scoring state
     if(S.live) return;
     S.results=data.results||{}; S.live=data.live||null;
-    S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[];
+    S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames();
     syncStatus='ok'; updateSyncDots();
-    document.getElementById('root').innerHTML=renderMain();
+    document.getElementById('root').innerHTML=renderDisplay(); renderOverlays();
     attachHandlers();
   });
   es.onerror=()=>{syncStatus='error';updateSyncDots();};
@@ -642,18 +906,24 @@ async function switchTournament(id) {
   stopRealtime(); currentTour=id; localStorage.setItem('udn_tour',id);
   S.results={}; S.live=null; S.liveHistory=[]; S.ko=freshKO(); S.sponsors=[];
   const data=await pullFromServer();
-  if(data){S.results=data.results||{};S.live=data.live||null;S.ko=data.ko||freshKO();S.sponsors=data.sponsors||[];}
+  if(data){S.results=data.results||{};S.live=data.live||null;S.ko=data.ko||freshKO();S.sponsors=data.sponsors||[];S.names=data.names||defaultNames();}
   S.adminOpen=false; render();
 }
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 const ADMIN_PIN = '1818';
+function defaultNames(){
+  const n={};
+  for(const [k,g] of Object.entries(GROUPS)) n[k]=[...g.teams];
+  return n;
+}
 const S = {
   authed:false, adminOpen:false, adminGroup:'A', adminTab:'group', displayTab:'groups',
   showPIN:false, pinError:'', showTourPicker:false,
   results:{}, live:null, liveHistory:[],
-  ko:freshKO(), sponsors:[]
+  ko:freshKO(), sponsors:[], names:defaultNames()
 };
+function getTeam(gk,idx){ return (S.names[gk]&&S.names[gk][idx])||GROUPS[gk].teams[idx]; }
 function freshLive(id) {
   return {matchId:id,games:[0,0],points:[0,0],deuce:false,adv:null,goldenPoint:false,tiebreak:false,tbPoints:[0,0],setWinner:null};
 }
@@ -721,7 +991,7 @@ function inlineGameScore(L){
   return`${POINT_LABELS[L.points[0]]}–${POINT_LABELS[L.points[1]]}`;
 }
 function getStandings(gk){
-  const rows=GROUPS[gk].teams.map((t,i)=>({team:t,idx:i,pts:0,gw:0,gl:0,mp:0}));
+  const rows=GROUPS[gk].teams.map((t,i)=>({team:getTeam(gk,i),idx:i,pts:0,gw:0,gl:0,mp:0}));
   MATCHES.filter(m=>m.group===gk).forEach(m=>{
     const r=S.results[m.id];if(!r)return;
     const r1=rows[m.t1],r2=rows[m.t2];
@@ -738,27 +1008,15 @@ function getLiveTeams(){
   if(!S.live)return null;
   const id=S.live.matchId;
   const gm=MATCHES.find(m=>m.id===id);
-  if(gm){const g=GROUPS[gm.group];return{t1:g.teams[gm.t1],t2:g.teams[gm.t2],context:`${g.label} · ${g.date} · ${g.time}`};}
+  if(gm){const g=GROUPS[gm.group];return{t1:getTeam(gm.group,gm.t1),t2:getTeam(gm.group,gm.t2),context:`${g.label} · ${g.date} · ${g.time}`};}
   const km=getKOMeta(id);
   if(km){const{t1,t2}=getKOTeams(id);return{t1,t2,context:`${km.label} · ${km.date} · ${km.time}`};}
   return null;
 }
 
-// ── UDAAN LOGO SVG ────────────────────────────────────────────────────────────
+// ── UDAAN BRAND LOGO ──────────────────────────────────────────────────────────
 function udaanLogo(size=52){
-  return`<svg width="${size}" height="${Math.round(size*1.1)}" viewBox="0 0 80 88" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M40 2 L73 14 L73 53 Q72 75 40 86 Q8 75 7 53 L7 14 Z" fill="#f46b1a" stroke="rgba(255,255,255,.3)" stroke-width="3"/>
-  <text x="23" y="20" font-size="7" fill="white" text-anchor="middle">★</text>
-  <text x="31.5" y="17" font-size="7" fill="white" text-anchor="middle">★</text>
-  <text x="40" y="15" font-size="9" fill="white" text-anchor="middle">★</text>
-  <text x="48.5" y="17" font-size="7" fill="white" text-anchor="middle">★</text>
-  <text x="57" y="20" font-size="7" fill="white" text-anchor="middle">★</text>
-  <text x="40" y="37" text-anchor="middle" font-family="Impact,Arial Narrow,sans-serif" font-size="21" fill="white" stroke="rgba(0,0,0,.4)" stroke-width="1.5" paint-order="stroke">UDAAN</text>
-  <text x="40" y="46" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" fill="white" font-weight="bold" letter-spacing="1">SPORTS ACADEMY</text>
-  <path d="M18 74 Q40 46 62 74" fill="#f0b429"/>
-  <path d="M12 76 L26 56 L34 66 L40 59 L46 66 L54 56 L68 76 Z" fill="rgba(10,30,80,.9)"/>
-  <path d="M33 55 Q37 51 40 53 Q43 51 47 55 Q43 53 40 56 Q37 53 33 55 Z" fill="rgba(10,30,80,.9)"/>
-</svg>`;
+  return `<img class="brand-logo" src="icons/udaan-logo.png" width="${size}" height="${size}" alt="Udaan Sports Academy">`;
 }
 
 // ── COURT BACKGROUND SVG ──────────────────────────────────────────────────────
@@ -915,7 +1173,7 @@ function renderDisplayGroupCard(gk){
   const gm=MATCHES.filter(m=>m.group===gk),played=gm.filter(m=>S.results[m.id]);
   const resultsHtml=played.map(m=>{
     const r=S.results[m.id];
-    const t1=g.teams[m.t1].split(' & ')[0],t2=g.teams[m.t2].split(' & ')[0];
+    const t1=getTeam(gk,m.t1).split(' & ')[0],t2=getTeam(gk,m.t2).split(' & ')[0];
     return`<div class="d-result-row">
       <div class="d-rt" style="color:${r.s1>r.s2?'rgba(255,255,255,.8)':'rgba(255,255,255,.3)'}">${t1}</div>
       <div class="d-rs">${r.s1}–${r.s2}</div>
@@ -1003,8 +1261,13 @@ function renderSponsorsAdmin(){
 }
 
 function renderGroupAdmin(g,standings){
+  const gk=S.adminGroup;
   return`
   <div class="admin-group-info">${g.date} &nbsp;·&nbsp; ${g.time}</div>
+  <div class="admin-standings-title" style="margin-bottom:6px;margin-top:0">Team Names</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px">
+    ${g.teams.map((_,i)=>`<input class="sp-input" placeholder="Team ${i+1}" value="${getTeam(gk,i)}" data-action="editName" data-gk="${gk}" data-ti="${i}"/>`).join('')}
+  </div>
   <div class="admin-match-list">
     ${MATCHES.filter(m=>m.group===S.adminGroup).map((m,i)=>renderAdminMatch(m,i+1)).join('')}
   </div>
@@ -1074,7 +1337,7 @@ function renderKOAdminMatch(id,idx){
 }
 
 function renderAdminMatch(m,idx){
-  const g=GROUPS[m.group],t1=g.teams[m.t1],t2=g.teams[m.t2],res=S.results[m.id],L=S.live;
+  const g=GROUPS[m.group],t1=getTeam(m.group,m.t1),t2=getTeam(m.group,m.t2),res=S.results[m.id],L=S.live;
   const isLive=L&&L.matchId===m.id,isDone=!!res;
   const badge=isLive?`<span class="match-badge badge-live">🔴 Live</span>`:isDone?`<span class="match-badge badge-done">✓ Done</span>`:`<span class="match-badge badge-pending">Pending</span>`;
   let ss='',actions='';
@@ -1168,6 +1431,15 @@ function attachHandlers(){
       });
       return;
     }
+    if(a==='editName') {
+      el.addEventListener('input',()=>{
+        const gk=el.dataset.gk, ti=+el.dataset.ti;
+        if(!S.names[gk]) S.names[gk]=[...GROUPS[gk].teams];
+        S.names[gk][ti]=el.value;
+        scheduleSave();
+      });
+      return;
+    }
     if(a==='spUpload') {
       el.addEventListener('change',()=>{
         const file=el.files[0]; if(!file) return;
@@ -1190,9 +1462,9 @@ function attachHandlers(){
         if(val===ADMIN_PIN){S.authed=true;S.showPIN=false;S.adminOpen=true;S.pinError='';render();}
         else{S.pinError='Incorrect PIN';document.getElementById('pin-error').textContent=S.pinError;document.getElementById('pin-field').value='';document.getElementById('pin-field').focus();}
       }
-      if(a==='lockAdmin')  {S.authed=false;S.adminOpen=false;render();}
-      if(a==='openAdmin')  {S.adminOpen=true;render();}
-      if(a==='closeAdmin') {S.adminOpen=false;render();}
+      if(a==='lockAdmin')  {S.authed=false;S.adminOpen=false;renderOverlays();}
+      if(a==='openAdmin')  {S.adminOpen=true;renderOverlays();}
+      if(a==='closeAdmin') {S.adminOpen=false;renderOverlays();}
       if(a==='setGroup')   {S.adminGroup=el.dataset.group;S.adminTab='group';render();}
       if(a==='setKOTab')   {S.adminTab='knockout';render();}
       if(a==='setSPTab')   {S.adminTab='sponsors';render();}
@@ -1228,13 +1500,26 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementB
 setInterval(()=>{const el=document.getElementById('clock-el');if(el)el.textContent=fmtClock();},1000);
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
-function renderMain(){
-  return renderDisplay() + renderAdminPanel() + renderPINModal() + renderFAB();
-}
+// Display view goes into #root; overlays (admin panel, PIN, FAB) go into #overlays
+// This ensures fixed-position overlays are never inside a stacking context.
 function render(){
-  document.getElementById('root').innerHTML=renderMain();
-  attachHandlers();
+  try {
+    document.getElementById('root').innerHTML=renderDisplay();
+  } catch(e) {
+    document.getElementById('root').innerHTML=`<div style="color:red;padding:20px">Render error: ${e.message}</div>`;
+    console.error('render error',e);
+  }
+  renderOverlays();
   startRealtime();
+  attachHandlers();
+}
+function renderOverlays(){
+  try {
+    document.getElementById('overlays').innerHTML=renderAdminPanel()+renderPINModal()+renderFAB();
+  } catch(e) {
+    console.error('overlay error',e);
+  }
+  attachHandlers();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
