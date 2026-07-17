@@ -425,9 +425,14 @@ function startRealtime() {
   es=new EventSource(dbPath());
   es.addEventListener('put',e=>{
     const {data}=JSON.parse(e.data); if(!data) return; if(saveTimer) return;
-    S.results=data.results||{}; S.live=data.live||null;
+    // If admin has a live match in progress, don't let SSE overwrite local scoring state
+    const adminLive = S.view==='admin' && S.live;
+    S.results=data.results||{};
     S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[];
+    if(!adminLive) S.live=data.live||null;
     syncStatus='ok'; updateSyncDots();
+    // Don't re-render admin mid-match — it clears liveHistory and disrupts scoring
+    if(adminLive) return;
     document.getElementById('root').innerHTML=S.view==='display'?renderDisplay():renderAdmin();
     attachHandlers();
   });
