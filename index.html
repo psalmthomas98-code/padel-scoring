@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>Udaan Padel Open — Live Scoring</title>
 <meta name="theme-color" content="#0b0e12" />
 <meta name="application-name" content="Udaan Padel Open" />
@@ -880,7 +880,7 @@ async function pushToServer() {
   syncStatus='saving'; updateSyncDots();
   try {
     const res=await fetch(dbPath(),{method:'PUT',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({results:S.results,live:S.live,ko:S.ko,sponsors:S.sponsors,names:S.names,presentation:S.presentation})});
+      body:JSON.stringify({results:S.results,live:S.live,ko:S.ko,sponsors:S.sponsors,names:S.names,players:S.players,presentation:S.presentation})});
     if(!res.ok) throw new Error(res.status);
     syncStatus='ok';
   } catch { syncStatus='error'; }
@@ -897,17 +897,23 @@ function startRealtime() {
   if (es) return;
   es=new EventSource(dbPath());
   es.addEventListener('put',e=>{
-    const {data}=JSON.parse(e.data); if(!data) return; if(saveTimer) return;
-    // Only skip SSE if THIS device is actively scoring (admin panel open with live match)
-    if(S.live && S.adminOpen) return;
+    const {data}=JSON.parse(e.data); if(!data) return;
+    if(saveTimer) return; // this device is mid-save; skip to avoid overwriting local state
+    if(S.live && S.adminOpen) return; // this device is actively scoring
     S.results=data.results||{}; S.live=data.live||null;
     S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames(); S.players=data.players||defaultPlayers();
     S.presentation=data.presentation||{mode:'standard',matchId:''};
     syncStatus='ok'; updateSyncDots();
-    document.getElementById('root').innerHTML=renderDisplay(); renderOverlays();
-    attachHandlers();
+    document.getElementById('root').innerHTML=renderDisplay();
+    renderOverlays(); // renderOverlays calls attachHandlers() — do NOT call again
   });
-  es.onerror=()=>{syncStatus='error';updateSyncDots();};
+  es.onerror=()=>{
+    syncStatus='error'; updateSyncDots();
+    // Close and reconnect after 3s so a dropped connection doesn't stay dead
+    try { es.close(); } catch(_){}
+    es=null;
+    setTimeout(startRealtime, 3000);
+  };
 }
 function stopRealtime() { if(es){es.close();es=null;} }
 function updateSyncDots() {
