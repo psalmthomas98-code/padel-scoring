@@ -1223,16 +1223,6 @@ ${S.showTourPicker?renderTourPicker():''}
     </div>`}
   </div>
 
-  <!-- Sponsors strip -->
-  <div class="d-sponsors">
-    ${S.sponsors.length
-      ? S.sponsors.map(sp=>sp.url
-          ? `<div class="d-sponsor-item"><img class="d-sponsor-img" src="${sp.url}" alt="${sp.name}" onerror="this.style.display='none';this.nextSibling.style.display='flex'"/><div class="d-sponsor-text" style="display:none">${sp.name}</div></div>`
-          : `<div class="d-sponsor-item"><div class="d-sponsor-text">${sp.name}</div></div>`
-        ).join('')
-      : `<div class="d-sponsor-empty">Sponsor logos appear here · Add via Admin → Sponsors</div>`
-    }
-  </div>
 </div>
 `;
 }
@@ -1602,9 +1592,9 @@ function renderPINModal(){
 // ── ADMIN PANEL ───────────────────────────────────────────────────────────────
 function renderAdminPanel(){
   if(!S.adminOpen) return '';
-  const isKO=S.adminTab==='knockout', isSP=S.adminTab==='sponsors',
+  const isKO=S.adminTab==='knockout',
         isWN=S.adminTab==='winners', isPL=S.adminTab==='players';
-  const isGroup=!isKO&&!isSP&&!isWN&&!isPL;
+  const isGroup=!isKO&&!isWN&&!isPL;
   const g=GROUPS[S.adminGroup], standings=getStandings(S.adminGroup);
   return`<div id="admin-panel" class="open">
   <div class="admin-topbar">
@@ -1622,10 +1612,9 @@ function renderAdminPanel(){
     <button class="atab ko-tab ${isKO?'active':''}" data-action="setKOTab">Knockout</button>
     <button class="atab ${isPL?'active':''}" data-action="setPLTab">Players</button>
     <button class="atab ${isWN?'active':''}" data-action="setWNTab">Winners</button>
-    <button class="atab sp-tab ${isSP?'active':''}" data-action="setSPTab">Sponsors</button>
   </div>
   <div class="admin-content">
-    ${isKO?renderKnockoutAdmin():isSP?renderSponsorsAdmin():isWN?renderWinnersAdmin():isPL?renderPlayersAdmin():renderGroupAdmin(g,standings)}
+    ${isKO?renderKnockoutAdmin():isWN?renderWinnersAdmin():isPL?renderPlayersAdmin():renderGroupAdmin(g,standings)}
   </div>
   ${S.showTourPicker?renderTourPicker():''}
 </div>`;
@@ -1636,13 +1625,6 @@ function renderAdminPanel(){
 function attachHandlers(){
   document.querySelectorAll('[data-action]').forEach(el=>{
     const a=el.dataset.action;
-    if(a==='spName') {
-      el.addEventListener('input',()=>{
-        S.sponsors[+el.dataset.si].name=el.value;
-        scheduleSave();
-      });
-      return;
-    }
     if(a==='editName') {
       el.addEventListener('input',()=>{
         const gk=el.dataset.gk, ti=+el.dataset.ti;
@@ -1662,20 +1644,6 @@ function attachHandlers(){
       });
       return;
     }
-    if(a==='spUpload') {
-      el.addEventListener('change',()=>{
-        const file=el.files[0]; if(!file) return;
-        const i=+el.dataset.si;
-        const reader=new FileReader();
-        reader.onload=e=>{
-          S.sponsors[i].url=e.target.result;
-          if(!S.sponsors[i].name) S.sponsors[i].name=file.name.replace(/\.[^.]+$/,'');
-          scheduleSave(); render();
-        };
-        reader.readAsDataURL(file);
-      });
-      return;
-    }
     el.addEventListener('click',async()=>{
       if(a==='showPIN')    {S.showPIN=true;S.pinError='';render();setTimeout(()=>document.getElementById('pin-field')?.focus(),50);}
       if(a==='closePIN')   {S.showPIN=false;render();}
@@ -1691,7 +1659,6 @@ function attachHandlers(){
       if(a==='setKOTab')   {S.adminTab='knockout';render();}
       if(a==='setWNTab')   {S.adminTab='winners';render();}
       if(a==='setPLTab')   {S.adminTab='players';render();}
-      if(a==='setSPTab')   {S.adminTab='sponsors';render();}
       if(a==='dispTab')    {S.displayTab=el.dataset.tab;scheduleSave();render();}
       if(a==='openPicker') {S.showTourPicker=true;render();}
       if(a==='closePicker'){S.showTourPicker=false;render();}
@@ -1714,9 +1681,6 @@ function attachHandlers(){
       if(a==='koGoLive')      {S.live=freshLive(el.dataset.id);S.liveHistory=[];S.presentation={mode:'standard',matchId:''};scheduleSave();render();}
       if(a==='koSave')        {S.results[el.dataset.id]={s1:S.live.games[0],s2:S.live.games[1]};S.live=null;S.liveHistory=[];propagateKOWinners();scheduleSave();render();}
       if(a==='koUndoResult')  {delete S.results[el.dataset.id];if(S.presentation.matchId===el.dataset.id)S.presentation={mode:'standard',matchId:''};propagateKOWinners();scheduleSave();render();}
-      if(a==='spAdd')         {S.sponsors.push({name:'',url:''});scheduleSave();render();}
-      if(a==='spRemove')      {S.sponsors.splice(+el.dataset.si,1);scheduleSave();render();}
-      if(a==='spClearLogo')   {S.sponsors[+el.dataset.si].url='';scheduleSave();render();}
     });
   });
 }
