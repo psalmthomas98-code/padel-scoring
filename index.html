@@ -268,15 +268,19 @@ function scheduleSave() {
 }
 
 function startRealtime() {
-  stopRealtime();
+  if (es) return;  // already connected — don't restart
   es = new EventSource(dbPath());
   es.addEventListener('put', e => {
     const {data} = JSON.parse(e.data);
     if (!data) return;
+    if (saveTimer) return;  // ignore stale Firebase data while a local save is pending
     S.results = data.results || {};
     S.live    = data.live    || null;
     syncStatus = 'ok'; updateSyncDots();
-    render(false);
+    // update DOM directly without full re-render to avoid restarting SSE
+    document.getElementById('root').innerHTML =
+      S.view==='display' ? renderDisplay() : renderAdmin();
+    attachHandlers();
   });
   es.onerror = () => { syncStatus='error'; updateSyncDots(); };
 }
@@ -417,7 +421,6 @@ function renderTourPicker() {
 // ── RENDER: DISPLAY ───────────────────────────────────────────────────────────
 
 function renderDisplay() {
-  startRealtime();
   const L=S.live, lm=L?MATCHES.find(m=>m.id===L.matchId):null;
   return `
 ${S.showTourPicker ? renderTourPicker() : ''}
@@ -626,10 +629,12 @@ setInterval(()=>{const el=document.getElementById('clock-el');if(el)el.textConte
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
 
-function render(withHandlers=true) {
+function render() {
   document.getElementById('root').innerHTML =
     S.view==='display' ? renderDisplay() : renderAdmin();
-  if (withHandlers) attachHandlers();
+  attachHandlers();
+  if (S.view==='display') startRealtime();
+  else stopRealtime();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
