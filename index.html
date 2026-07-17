@@ -562,68 +562,95 @@ function udaanLogo(size=52){
 function courtSVG(){
   return`<svg id="court-canvas" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="arenaGlow" cx="50%" cy="35%" r="60%">
-      <stop offset="0%" stop-color="#3a1408" stop-opacity="1"/>
-      <stop offset="60%" stop-color="#180804" stop-opacity="1"/>
-      <stop offset="100%" stop-color="#0a0402" stop-opacity="1"/>
+    <!-- Warm terracotta clay surface, lit from upper-left like the photo -->
+    <linearGradient id="clayBase" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#c4521e"/>
+      <stop offset="35%"  stop-color="#b84518"/>
+      <stop offset="70%"  stop-color="#a33a12"/>
+      <stop offset="100%" stop-color="#8e2f0d"/>
+    </linearGradient>
+    <!-- Upper-left warm highlight (sun hitting the court) -->
+    <radialGradient id="sunPatch" cx="18%" cy="22%" r="55%">
+      <stop offset="0%"   stop-color="#d9703a" stop-opacity="0.7"/>
+      <stop offset="60%"  stop-color="#c05020" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#c05020" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="courtGrad" cx="50%" cy="45%" r="55%">
-      <stop offset="0%" stop-color="#b03a12"/>
-      <stop offset="50%" stop-color="#8a2a08"/>
-      <stop offset="100%" stop-color="#6a1e06"/>
+    <!-- Lower-right shadow -->
+    <radialGradient id="shadowPatch" cx="82%" cy="85%" r="50%">
+      <stop offset="0%"   stop-color="#3a1206" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#3a1206" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="spotLight1" cx="35%" cy="50%" r="30%">
-      <stop offset="0%" stop-color="white" stop-opacity="0.06"/>
-      <stop offset="100%" stop-color="white" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="spotLight2" cx="65%" cy="50%" r="30%">
-      <stop offset="0%" stop-color="white" stop-opacity="0.06"/>
-      <stop offset="100%" stop-color="white" stop-opacity="0"/>
-    </radialGradient>
-    <filter id="netGlow" x="-20%" y="-50%" width="140%" height="200%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    <!-- Subtle diagonal grain texture (feTurbulence) -->
+    <filter id="clayGrain" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65 0.45" numOctaves="4" seed="8" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="grey"/>
+      <feBlend in="SourceGraphic" in2="grey" mode="overlay" result="blended"/>
+      <feComposite in="blended" in2="SourceGraphic" operator="in"/>
     </filter>
+    <!-- Net mesh pattern -->
+    <pattern id="netMesh" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="none"/>
+      <line x1="0" y1="0" x2="10" y2="10" stroke="rgba(30,20,15,0.55)" stroke-width="0.8"/>
+      <line x1="10" y1="0" x2="0" y2="10" stroke="rgba(30,20,15,0.55)" stroke-width="0.8"/>
+    </pattern>
+    <!-- Content overlay: dark-to-transparent from bottom so text stays readable -->
+    <linearGradient id="contentDim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#1a0800" stop-opacity="0.55"/>
+      <stop offset="30%"  stop-color="#1a0800" stop-opacity="0.30"/>
+      <stop offset="60%"  stop-color="#1a0800" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#0d0400" stop-opacity="0.75"/>
+    </linearGradient>
+    <!-- Vignette edges -->
+    <radialGradient id="vignette" cx="50%" cy="50%" r="72%">
+      <stop offset="0%"   stop-color="black" stop-opacity="0"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.68"/>
+    </radialGradient>
   </defs>
-  <!-- Base dark -->
-  <rect width="1280" height="720" fill="#0a0402"/>
-  <!-- Arena ambient -->
-  <rect width="1280" height="720" fill="url(#arenaGlow)"/>
-  <!-- Court surface (perspective trapezoid) -->
-  <polygon points="320,155 960,155 1100,580 180,580" fill="url(#courtGrad)"/>
-  <!-- Court outer border -->
-  <polygon points="320,155 960,155 1100,580 180,580" fill="none" stroke="rgba(255,220,160,.5)" stroke-width="3"/>
-  <!-- Net (center horizontal) -->
-  <line x1="225" y1="368" x2="1055" y2="368" stroke="rgba(255,255,255,.9)" stroke-width="5" filter="url(#netGlow)"/>
-  <!-- Net posts -->
-  <line x1="225" y1="355" x2="225" y2="380" stroke="rgba(255,255,255,.7)" stroke-width="4"/>
-  <line x1="1055" y1="355" x2="1055" y2="380" stroke="rgba(255,255,255,.7)" stroke-width="4"/>
-  <!-- Service lines top half -->
-  <line x1="275" y1="262" x2="1005" y2="262" stroke="rgba(255,255,255,.45)" stroke-width="2"/>
-  <!-- Service lines bottom half -->
-  <line x1="275" y1="474" x2="1005" y2="474" stroke="rgba(255,255,255,.45)" stroke-width="2"/>
-  <!-- Center vertical lines (top) -->
-  <line x1="640" y1="155" x2="640" y2="368" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
-  <!-- Center vertical lines (bottom) -->
-  <line x1="640" y1="368" x2="640" y2="580" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
-  <!-- Spotlight overlays -->
-  <polygon points="320,155 960,155 1100,580 180,580" fill="url(#spotLight1)"/>
-  <polygon points="320,155 960,155 1100,580 180,580" fill="url(#spotLight2)"/>
-  <!-- Dark overlay on court for content readability -->
-  <polygon points="320,155 960,155 1100,580 180,580" fill="rgba(0,0,0,.52)"/>
-  <!-- Cover corners with dark arena -->
-  <polygon points="0,0 320,0 320,155 180,580 0,720" fill="#0a0402"/>
-  <polygon points="1280,0 960,0 960,155 1100,580 1280,720" fill="#0a0402"/>
-  <polygon points="0,0 1280,0 960,155 320,155" fill="#0a0402"/>
-  <polygon points="0,720 1280,720 1100,580 180,580" fill="#0a0402"/>
-  <!-- Subtle vignette -->
-  <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
-    <stop offset="0%" stop-color="black" stop-opacity="0"/>
-    <stop offset="100%" stop-color="black" stop-opacity="0.7"/>
-  </radialGradient>
+
+  <!-- ── Clay surface ── -->
+  <rect width="1280" height="720" fill="url(#clayBase)"/>
+  <!-- Grain texture overlay -->
+  <rect width="1280" height="720" fill="url(#clayBase)" filter="url(#clayGrain)" opacity="0.35"/>
+  <!-- Sun highlight upper-left -->
+  <rect width="1280" height="720" fill="url(#sunPatch)"/>
+  <!-- Shadow lower-right -->
+  <rect width="1280" height="720" fill="url(#shadowPatch)"/>
+
+  <!-- ── Court white lines (perspective: lines converge toward top-center) ── -->
+  <!-- Baseline (bottom) -->
+  <line x1="-40" y1="680" x2="1320" y2="680" stroke="rgba(255,255,255,0.80)" stroke-width="5"/>
+  <!-- Service line (mid-lower) -->
+  <line x1="60"  y1="490" x2="1220" y2="490" stroke="rgba(255,255,255,0.60)" stroke-width="3.5"/>
+  <!-- Service line (mid-upper) — near net -->
+  <line x1="150" y1="340" x2="1130" y2="340" stroke="rgba(255,255,255,0.55)" stroke-width="3"/>
+  <!-- Center service line (vertical, lower half) -->
+  <line x1="640" y1="490" x2="640" y2="680" stroke="rgba(255,255,255,0.50)" stroke-width="3"/>
+  <!-- Center service line (vertical, upper half to net) -->
+  <line x1="640" y1="255" x2="640" y2="340" stroke="rgba(255,255,255,0.45)" stroke-width="2.5"/>
+  <!-- Left sideline -->
+  <line x1="100" y1="255" x2="-20"  y2="720" stroke="rgba(255,255,255,0.55)" stroke-width="3.5"/>
+  <!-- Right sideline -->
+  <line x1="1180" y1="255" x2="1300" y2="720" stroke="rgba(255,255,255,0.55)" stroke-width="3.5"/>
+
+  <!-- ── Net band (white top strip — like the branded net in the photo) ── -->
+  <rect x="0" y="218" width="1280" height="38" fill="white" opacity="0.93"/>
+  <!-- Net brand text strip -->
+  <rect x="0" y="218" width="1280" height="38" fill="rgba(240,240,235,0.95)"/>
+  <text x="640" y="244" text-anchor="middle" font-family="Impact,'Arial Narrow',sans-serif" font-size="17" fill="#555" letter-spacing="12" opacity="0.6">UDAAN PADEL OPEN</text>
+
+  <!-- ── Net mesh below white band ── -->
+  <rect x="0" y="256" width="1280" height="90" fill="url(#netMesh)" opacity="0.9"/>
+  <!-- Net shadow on court -->
+  <rect x="0" y="342" width="1280" height="18" fill="rgba(40,10,0,0.25)"/>
+
+  <!-- ── Net posts (left and right pillars) ── -->
+  <rect x="82"   y="195" width="18" height="175" fill="rgba(60,40,30,0.85)" rx="3"/>
+  <rect x="1180" y="195" width="18" height="175" fill="rgba(60,40,30,0.85)" rx="3"/>
+
+  <!-- ── Content readability overlay ── -->
+  <rect width="1280" height="720" fill="url(#contentDim)"/>
+  <!-- Edge vignette -->
   <rect width="1280" height="720" fill="url(#vignette)"/>
-  <!-- Orange glow rim at bottom (branded) -->
-  <rect x="0" y="715" width="1280" height="5" fill="rgba(244,107,26,.6)"/>
 </svg>`;
 }
 
