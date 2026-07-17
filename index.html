@@ -351,6 +351,10 @@ body {
 .sp-input::placeholder { color: var(--muted); }
 .sp-remove { background: var(--raised); border: 1px solid var(--border); color: var(--loss); padding: 6px 10px; cursor: pointer; font-size: 11px; font-weight: 800; }
 .sp-add { background: rgba(244,107,26,.15); border: 1px solid rgba(244,107,26,.3); color: var(--fire); padding: 8px 18px; cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.sp-upload-btn { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.18); color: var(--chalk); padding: 6px 12px; cursor: pointer; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+.sp-upload-btn:hover { background: rgba(255,255,255,.12); }
+.sp-file-input { display: none; }
+.sp-logo-label { font-size: 10px; color: var(--muted); flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -865,13 +869,17 @@ ${S.showTourPicker?renderTourPicker():''}
 function renderSponsorsAdmin(){
   return`
   <div class="admin-standings-title">Sponsor Logos — shown in the display strip at the bottom</div>
-  <div style="font-size:11px;color:var(--muted);margin-bottom:16px">Add a logo URL (any image URL) or just a name. Logos display left-to-right in the order shown.</div>
+  <div style="font-size:11px;color:var(--muted);margin-bottom:16px">Upload a PNG/JPG for each sponsor, or enter a name only. Logos display left-to-right.</div>
   <div id="sp-list">
     ${S.sponsors.map((sp,i)=>`
     <div class="sp-row" data-si="${i}">
       ${sp.url?`<img class="sp-preview" src="${sp.url}" alt=""/>` : `<div class="sp-preview"></div>`}
       <input class="sp-input" placeholder="Sponsor name" value="${sp.name||''}" data-action="spName" data-si="${i}"/>
-      <input class="sp-input" placeholder="Logo image URL (optional)" value="${sp.url||''}" data-action="spUrl" data-si="${i}" style="flex:2"/>
+      <label class="sp-upload-btn">
+        ${sp.url?'Change Logo':'Upload Logo'}
+        <input type="file" class="sp-file-input" accept="image/png,image/jpeg,image/svg+xml,image/webp" data-action="spUpload" data-si="${i}"/>
+      </label>
+      ${sp.url?`<button class="sp-upload-btn" style="color:var(--muted)" data-action="spClearLogo" data-si="${i}">✕ Logo</button>`:''}
       <button class="sp-remove" data-action="spRemove" data-si="${i}">✕</button>
     </div>`).join('')}
   </div>
@@ -983,16 +991,24 @@ function renderAdminMatch(m,idx){
 function attachHandlers(){
   document.querySelectorAll('[data-action]').forEach(el=>{
     const a=el.dataset.action;
-    // sponsor inputs use 'input' event, not click
-    if(a==='spName'||a==='spUrl') {
+    if(a==='spName') {
       el.addEventListener('input',()=>{
-        const i=+el.dataset.si;
-        if(a==='spName') S.sponsors[i].name=el.value;
-        else S.sponsors[i].url=el.value;
+        S.sponsors[+el.dataset.si].name=el.value;
         scheduleSave();
-        // refresh preview without full render
-        const row=el.closest('.sp-row');
-        if(row){const img=row.querySelector('.sp-preview');if(img&&a==='spUrl'){img.src=el.value;}}
+      });
+      return;
+    }
+    if(a==='spUpload') {
+      el.addEventListener('change',()=>{
+        const file=el.files[0]; if(!file) return;
+        const i=+el.dataset.si;
+        const reader=new FileReader();
+        reader.onload=e=>{
+          S.sponsors[i].url=e.target.result;
+          if(!S.sponsors[i].name) S.sponsors[i].name=file.name.replace(/\.[^.]+$/,'');
+          scheduleSave(); render();
+        };
+        reader.readAsDataURL(file);
       });
       return;
     }
@@ -1024,6 +1040,7 @@ function attachHandlers(){
       if(a==='koUndoResult')  {delete S.results[el.dataset.id];propagateKOWinners();scheduleSave();render();}
       if(a==='spAdd')         {S.sponsors.push({name:'',url:''});scheduleSave();render();}
       if(a==='spRemove')      {S.sponsors.splice(+el.dataset.si,1);scheduleSave();render();}
+      if(a==='spClearLogo')   {S.sponsors[+el.dataset.si].url='';scheduleSave();render();}
     });
   });
 }
