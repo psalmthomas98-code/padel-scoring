@@ -850,6 +850,177 @@ input { font: inherit; }
   #display-view + .mode-fab .fab-btn { opacity: .62; }
 }
 
+/* ── BROADCAST HEADER + COMPLETE RESULTS ──────────────────────────────────── */
+.d-banner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(330px, 1fr) auto minmax(170px, 1fr);
+  align-items: center;
+  min-height: 94px;
+  padding: 12px clamp(18px, 3.2vw, 54px);
+  gap: clamp(20px, 3vw, 52px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% -80%, rgba(244,107,26,.26), transparent 45%),
+    linear-gradient(110deg, rgba(20,12,8,.98), rgba(8,10,15,.97) 48%, rgba(15,9,6,.98));
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(244,107,26,.8);
+  box-shadow: 0 14px 40px rgba(0,0,0,.32), inset 0 -1px 0 rgba(244,107,26,.15);
+}
+.d-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .28;
+  background: repeating-linear-gradient(112deg, transparent 0 88px, rgba(255,255,255,.035) 89px 90px);
+}
+.d-banner::after {
+  content: '';
+  position: absolute;
+  left: clamp(18px, 3.2vw, 54px);
+  right: clamp(18px, 3.2vw, 54px);
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--fire), var(--gold) 25%, rgba(244,107,26,.12) 62%, transparent);
+}
+.d-banner-left,
+.d-banner-center,
+.d-banner-right { position: relative; z-index: 1; min-width: 0; }
+.d-banner-left { display: flex; align-items: center; gap: 15px; }
+.d-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  flex: 0 0 62px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.015));
+  box-shadow: 0 10px 30px rgba(0,0,0,.32), 0 0 25px rgba(244,107,26,.08);
+}
+.d-banner-left .brand-logo { width: 52px; height: 52px; border-radius: 10px; }
+.d-brand-copy { min-width: 0; }
+.d-banner-kicker,
+.d-clock-label,
+.d-stage-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255,255,255,.42);
+  font: 800 8px/1 Arial,sans-serif;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+}
+.d-banner-kicker span,
+.d-clock-label span { width: 6px; height: 6px; border-radius: 50%; background: var(--fire); box-shadow: 0 0 10px var(--fire); }
+.d-banner-title {
+  margin-top: 6px;
+  font-size: clamp(25px, 2.35vw, 39px);
+  letter-spacing: clamp(3px, .36vw, 7px);
+  line-height: .92;
+  text-shadow: 0 8px 30px rgba(0,0,0,.5);
+}
+.d-banner-sub { margin-top: 7px; max-width: 100%; font-size: 8px; letter-spacing: .23em; color: rgba(255,255,255,.35); }
+.d-banner-center { display: grid; justify-items: center; gap: 8px; }
+.d-stage-label { color: rgba(255,255,255,.26); }
+.d-stage-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 10px;
+  background: rgba(255,255,255,.035);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+}
+.dstab {
+  min-width: 126px;
+  min-height: 38px;
+  padding: 8px 15px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(255,255,255,.38);
+  letter-spacing: .16em;
+}
+.dstab:first-child { border-right: 0; }
+.dstab span { margin-right: 5px; color: rgba(255,255,255,.2); font-size: 8px; }
+.dstab.active {
+  color: #fff;
+  background: linear-gradient(135deg, #ff741d, #ef5c0a);
+  box-shadow: 0 7px 18px rgba(244,107,26,.25), inset 0 1px 0 rgba(255,255,255,.18);
+}
+.dstab.active span { color: rgba(255,255,255,.62); }
+.d-banner-right { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
+.d-clock-block { position: relative; min-width: 148px; padding-left: 22px; text-align: right; }
+.d-clock-block::before { content: ''; position: absolute; inset: 3px auto 3px 0; width: 1px; background: linear-gradient(transparent, rgba(244,107,26,.75), transparent); }
+.d-clock-label { justify-content: flex-end; margin-bottom: 5px; }
+.d-clock-label span { width: 5px; height: 5px; }
+.d-clock { font-size: clamp(31px, 3.1vw, 46px); letter-spacing: .06em; line-height: .82; }
+.d-date { margin-top: 7px; font-size: 8px; letter-spacing: .18em; }
+
+.d-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px 4px;
+  border-top: 1px solid rgba(255,255,255,.065);
+  color: rgba(255,255,255,.28);
+  font: 800 7px/1 Arial,sans-serif;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+}
+.d-results-head span:last-child { color: rgba(244,107,26,.7); }
+.d-results-wrap { max-height: none; overflow: visible; }
+.d-result-row { min-height: 18px; padding: 3px 8px; }
+.d-rt { font-size: 8px; }
+.d-rs { min-width: 27px; text-align: center; font-size: 12px; }
+
+@media (max-width: 1080px) {
+  .d-banner { grid-template-columns: minmax(285px,1fr) auto minmax(120px,.65fr); gap: 16px; padding-inline: 18px; }
+  .d-brand-mark { width: 54px; height: 54px; flex-basis: 54px; }
+  .d-banner-left .brand-logo { width: 44px; height: 44px; }
+  .d-banner-title { font-size: clamp(22px,2.8vw,31px); }
+  .d-banner-sub { max-width: 36vw; }
+  .dstab { min-width: 104px; padding-inline: 10px; }
+}
+
+@media (max-width: 760px), (max-height: 560px) {
+  .d-banner {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    min-height: 0;
+    padding: 11px 14px 12px;
+    gap: 11px 14px;
+  }
+  .d-banner-left { grid-column: 1 / -1; width: auto; gap: 11px; }
+  .d-brand-mark { width: 46px; height: 46px; flex-basis: 46px; border-radius: 12px; }
+  .d-banner-left .brand-logo { width: 38px; height: 38px; }
+  .d-banner-kicker { display: none; }
+  .d-banner-title { margin-top: 0; font-size: clamp(20px,6vw,27px); letter-spacing: .16em; white-space: nowrap; }
+  .d-banner-sub { max-width: 76vw; margin-top: 5px; font-size: 7px; }
+  .d-banner-center { grid-column: 1; justify-items: stretch; gap: 0; }
+  .d-stage-label { display: none; }
+  .d-stage-tabs { width: 100%; }
+  .dstab { min-width: 0; min-height: 35px; padding: 7px 9px; font-size: 8px; }
+  .d-banner-right { grid-column: 2; width: auto; }
+  .d-banner-right { gap: 8px; }
+  .d-clock-block { min-width: 86px; padding-left: 12px; }
+  .d-clock-label,.d-date { display: none; }
+  .d-clock { font-size: 26px; }
+  .d-admin-btn { min-height: 35px; padding: 6px 9px; font-size: 8px; }
+  .d-results-head { padding-top: 7px; }
+  .d-result-row { min-height: 24px; padding-block: 5px; }
+  .d-rt { font-size: 9px; }
+}
+
+@media (max-width: 400px) {
+  .d-banner-title { font-size: 18px; }
+  .d-banner-sub { letter-spacing: .15em; }
+  .dstab span { display: none; }
+  .d-clock { font-size: 23px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1209,23 +1380,26 @@ ${S.showTourPicker?renderTourPicker():''}
 <div id="display-view">
   ${courtSVG()}
 
-  <!-- Banner -->
-  <div class="d-banner">
+  <!-- Tournament broadcast banner -->
+  <header class="d-banner">
     <div class="d-banner-left">
-      ${udaanLogo(40)}
-      <div>
+      <div class="d-brand-mark">${udaanLogo(52)}</div>
+      <div class="d-brand-copy">
+        <div class="d-banner-kicker"><span></span> Live Tournament</div>
         <div class="d-banner-title">Udaan Padel Open</div>
         <div class="d-banner-sub">${showKO?'Sun 19 July · Knockout Stage':'Sat 18 July · Group Stage'}</div>
       </div>
     </div>
     <div class="d-banner-center">
+      <div class="d-stage-label">Tournament View</div>
       <div class="d-stage-tabs">
-        <button class="dstab ${!showKO?'active':''}" data-action="dispTab" data-tab="groups">Groups</button>
-        <button class="dstab ${showKO?'active':''}" data-action="dispTab" data-tab="knockout">Knockout</button>
+        <button class="dstab ${!showKO?'active':''}" data-action="dispTab" data-tab="groups"><span>01</span> Groups</button>
+        <button class="dstab ${showKO?'active':''}" data-action="dispTab" data-tab="knockout"><span>02</span> Knockout</button>
       </div>
     </div>
     <div class="d-banner-right">
-      <div style="text-align:right">
+      <div class="d-clock-block">
+        <div class="d-clock-label"><span></span> Event Time</div>
         <div class="d-clock" id="clock-el">${fmtClock()}</div>
         <div class="d-date">${fmtDate()}</div>
       </div>
@@ -1234,7 +1408,7 @@ ${S.showTourPicker?renderTourPicker():''}
         : `<button class="d-admin-btn" data-action="showPIN">Admin</button>`
       }
     </div>
-  </div>
+  </header>
 
   <!-- Live zone -->
   <div class="d-live-zone">
@@ -1365,7 +1539,7 @@ function renderDisplayGroupCard(gk){
     </table>
   </div>
   <div class="d-played">${played.length} / ${gm.length} played</div>
-  ${resultsHtml?`<div class="d-results-wrap">${resultsHtml}</div>`:''}
+  ${resultsHtml?`<div class="d-results-head"><span>Match Results</span><span>${played.length} complete</span></div><div class="d-results-wrap">${resultsHtml}</div>`:''}
 </div>`;
 }
 
