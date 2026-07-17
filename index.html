@@ -523,7 +523,7 @@ function getStandings(gk){
     const r=S.results[m.id];if(!r)return;
     const r1=rows[m.t1],r2=rows[m.t2];
     r1.mp++;r2.mp++;r1.gw+=r.s1;r1.gl+=r.s2;r2.gw+=r.s2;r2.gl+=r.s1;
-    if(r.s1>r.s2)r1.pts+=2;else if(r.s2>r.s1)r2.pts+=2;else{r1.pts++;r2.pts++;}
+    if(r.s1>r.s2)r1.pts+=3;else if(r.s2>r.s1)r2.pts+=3;
   });
   rows.forEach(r=>r.gd=r.gw-r.gl);
   return rows.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gw-a.gw||a.gl-b.gl);
@@ -786,11 +786,12 @@ function renderDisplayGroupCard(gk){
   </div>
   <div class="d-group-table-wrap">
     <table class="d-group-table">
-      <thead><tr><th>#</th><th style="text-align:left">Team</th><th>MP</th><th>Pts</th><th>GD</th></tr></thead>
+      <thead><tr><th>#</th><th style="text-align:left">Team</th><th>MP</th><th>Pts</th><th>GW</th><th>GL</th><th>GD</th></tr></thead>
       <tbody>
         ${standings.map((row,i)=>{const gd=row.gd;return`<tr class="${i<2?'d-top2':''}">
-          <td class="d-rank">${i+1}</td><td>${row.team}</td>
+          <td class="d-rank">${i<2?'Q':i+1}</td><td>${row.team}</td>
           <td style="color:rgba(255,255,255,.3)">${row.mp}</td><td class="d-pts">${row.pts}</td>
+          <td style="color:rgba(255,255,255,.55)">${row.gw}</td><td style="color:rgba(255,255,255,.35)">${row.gl}</td>
           <td class="${gd>0?'d-gd-pos':gd<0?'d-gd-neg':'d-gd-zero'}">${gd>0?'+':''}${gd}</td>
         </tr>`;}).join('')}
       </tbody>
@@ -898,7 +899,7 @@ function renderGroupAdmin(g,standings){
       <thead><tr><th>Team</th><th>MP</th><th>Pts</th><th>GW</th><th>GL</th><th>GD</th></tr></thead>
       <tbody>
         ${standings.map((row,i)=>{const gd=row.gd,gc=gd>0?'var(--win)':gd<0?'var(--loss)':'var(--muted)';return`<tr>
-          <td style="color:${i<2?'var(--chalk)':'var(--muted)'};font-weight:${i<2?700:400}">${row.team}</td>
+          <td style="color:${i<2?'var(--chalk)':'var(--muted)'};font-weight:${i<2?700:400}">${i<2?'✓ ':''} ${row.team}</td>
           <td style="color:var(--muted)">${row.mp}</td><td class="pts">${row.pts}</td>
           <td style="color:var(--win)">${row.gw}</td><td style="color:var(--loss)">${row.gl}</td>
           <td style="color:${gc}">${gd>0?'+':''}${gd}</td>
