@@ -411,6 +411,7 @@ async function pushToServer() {
     if(!res.ok) throw new Error(res.status);
     syncStatus='ok';
   } catch { syncStatus='error'; }
+  saveTimer=null;
   updateSyncDots();
 }
 async function pullFromServer() {
@@ -867,7 +868,6 @@ function renderKODisplay(){
 
 // ── RENDER: ADMIN ─────────────────────────────────────────────────────────────
 function renderAdmin(){
-  stopRealtime();
   const g=GROUPS[S.adminGroup],standings=getStandings(S.adminGroup);
   const isKO=S.adminTab==='knockout', isSP=S.adminTab==='sponsors';
   return`
@@ -1080,7 +1080,7 @@ setInterval(()=>{const el=document.getElementById('clock-el');if(el)el.textConte
 function render(){
   document.getElementById('root').innerHTML=S.view==='display'?renderDisplay():renderAdmin();
   attachHandlers();
-  if(S.view==='display')startRealtime();else stopRealtime();
+  startRealtime();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
