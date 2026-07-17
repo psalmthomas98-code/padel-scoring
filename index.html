@@ -138,9 +138,32 @@ body {
 .top2 .rank-cell { color: var(--gold); }
 .match-progress { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: center; padding: 5px 8px; border-top: 1px solid var(--border); flex-shrink: 0; }
 
+/* ── KNOCKOUT DISPLAY ── */
+.ko-display { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; min-height: 0; overflow: hidden; }
+.ko-round-col { display: flex; flex-direction: column; gap: 0; min-height: 0; overflow: hidden; }
+.ko-round-head { font-family: Impact,'Arial Narrow',sans-serif; font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: var(--fire); padding: 6px 12px; background: var(--surface); border: 1px solid var(--border); border-bottom: none; text-align: center; flex-shrink: 0; }
+.ko-round-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 6px; padding: 8px; background: var(--surface); border: 1px solid var(--border); }
+.ko-match-card { background: var(--raised); border: 1px solid var(--border); padding: 7px 10px; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px; min-height: 0; }
+.ko-match-card.is-live { border-color: var(--fire); }
+.ko-match-card.is-done { border-left: 3px solid var(--win); }
+.ko-match-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.ko-team-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ko-team-name { font-size: clamp(9px,1vw,13px); font-weight: 700; color: var(--chalk); line-height: 1.2; flex: 1; }
+.ko-team-name.winner { color: var(--gold); }
+.ko-team-name.tbd { color: var(--muted); font-style: italic; font-weight: 400; }
+.ko-team-score { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(14px,2vw,22px); color: var(--fire); font-variant-numeric: tabular-nums; min-width: 18px; text-align: right; }
+.ko-team-score.winner { color: var(--gold); }
+.ko-divider { height: 1px; background: var(--border); margin: 2px 0; }
+
 .mode-fab { position: fixed; bottom: 14px; right: 14px; z-index: 200; }
 .fab-btn { background: var(--raised); border: 1px solid var(--border); color: var(--muted); padding: 8px 16px; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
 .fab-btn:hover { background: var(--border); color: var(--chalk); }
+
+/* ── DISPLAY STAGE SWITCHER ── */
+.display-stage-tabs { display: flex; gap: 0; }
+.dstab { padding: 5px 14px; background: var(--raised); border: 1px solid var(--border); color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.12s; }
+.dstab:first-child { border-right: none; }
+.dstab.active { background: var(--fire); border-color: var(--fire); color: white; }
 
 /* ── ADMIN ── */
 #admin-view { height: 100vh; overflow-y: auto; padding: 16px; display: none; }
@@ -150,6 +173,8 @@ body {
 .admin-group-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
 .atab { padding: 7px 18px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.12s; }
 .atab.active,.atab:hover { background: var(--fire); border-color: var(--fire); color: white; }
+.atab.ko-tab { border-color: rgba(240,180,41,.4); color: var(--gold); }
+.atab.ko-tab.active { background: var(--gold); border-color: var(--gold); color: #1a1000; }
 .admin-group-info { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
 .admin-match-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
 .admin-match { background: var(--surface); border: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -159,6 +184,7 @@ body {
 .admin-teams { flex: 1; font-size: 13px; line-height: 1.5; min-width: 120px; }
 .admin-teams strong { font-weight: 700; color: var(--chalk); }
 .admin-teams .vs { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.admin-teams .tbd-team { color: var(--muted); font-style: italic; }
 .match-badge { font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; padding: 3px 8px; flex-shrink: 0; }
 .badge-pending { background: var(--raised); color: var(--muted); }
 .badge-live    { background: var(--fire); color: white; }
@@ -186,6 +212,7 @@ body {
 .btn-result  { background: var(--raised); color: var(--muted); border: 1px solid var(--border); }
 .btn-display { background: var(--raised); color: var(--chalk); border: 1px solid var(--border); }
 .btn-switch  { background: var(--raised); color: var(--gold); border: 1px solid rgba(240,180,41,.3); }
+.btn-autofill { background: rgba(240,180,41,.15); color: var(--gold); border: 1px solid rgba(240,180,41,.3); }
 
 .admin-standings { margin-top: 4px; }
 .admin-standings-title { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; font-weight: 700; }
@@ -196,12 +223,19 @@ body {
 .admin-st-table td:first-child { text-align: left; font-weight: 600; }
 .admin-st-table tbody tr:last-child td { border-bottom: none; }
 .admin-st-table .pts { font-family: Impact,'Arial Narrow',sans-serif; font-size: 20px; color: var(--fire); }
+
+/* ── KO ADMIN ── */
+.ko-section-head { font-family: Impact,'Arial Narrow',sans-serif; font-size: 15px; letter-spacing: 3px; text-transform: uppercase; color: var(--gold); padding: 8px 0; border-bottom: 1px solid rgba(240,180,41,.2); margin-bottom: 10px; margin-top: 20px; }
+.ko-section-head:first-child { margin-top: 0; }
+.ko-admin-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 8px; }
+.ko-admin-info { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+.ko-seeding-note { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
-// ── CONFIG — change only these two lines for a new tournament ────────────────
+// ── CONFIG ────────────────────────────────────────────────────────────────────
 const FIREBASE_URL  = 'https://padel-scoring-58d86-default-rtdb.asia-southeast1.firebasedatabase.app';
 const TOURNAMENTS   = [
   { id: 'padel-july-2026',   label: 'Udaan Padel Open',    date: 'Jul 2026' },
@@ -220,6 +254,22 @@ const GROUPS = {
   D: { label:'Group D', letter:'D', date:'Sun 19 Jul', time:'3:00 – 5:30 PM',  color:'#197a4a',
        teams:['Harsh & Chirag','Ihit & Lakshya','Yajush & Arnav','Manish & Vishwas'] }
 };
+
+// KO bracket: QF seeding 1v8,2v7,3v6,4v5
+// Seeds 1-4 = A/B/C/D group winners; Seeds 5-8 = A/B/C/D runners-up
+// QF1: S1(A1) vs S8(D2) | QF2: S2(B1) vs S7(C2) | QF3: S3(C1) vs S6(B2) | QF4: S4(D1) vs S5(A2)
+const KO_BRACKET = [
+  // QFs
+  {id:'qf1', round:'qf', label:'QF 1', date:'Sun 19 Jul', time:'5:30 PM', sfSlot:null},
+  {id:'qf2', round:'qf', label:'QF 2', date:'Sun 19 Jul', time:'5:30 PM', sfSlot:null},
+  {id:'qf3', round:'qf', label:'QF 3', date:'Sun 19 Jul', time:'5:30 PM', sfSlot:null},
+  {id:'qf4', round:'qf', label:'QF 4', date:'Sun 19 Jul', time:'5:30 PM', sfSlot:null},
+  // SFs
+  {id:'sf1', round:'sf', label:'Semi Final 1', date:'Sun 19 Jul', time:'7:30 PM'},
+  {id:'sf2', round:'sf', label:'Semi Final 2', date:'Sun 19 Jul', time:'7:30 PM'},
+  // Final
+  {id:'final', round:'final', label:'Final', date:'Sun 19 Jul', time:'10:00 PM'},
+];
 
 function generateMatches() {
   const all = [];
@@ -241,12 +291,18 @@ let es          = null;
 
 function dbPath() { return `${FIREBASE_URL}/${currentTour}.json`; }
 
+function freshKO() {
+  const ko = {};
+  KO_BRACKET.forEach(m => { ko[m.id] = {t1:'', t2:''}; });
+  return ko;
+}
+
 async function pushToServer() {
   syncStatus = 'saving'; updateSyncDots();
   try {
     const res = await fetch(dbPath(), {
       method:'PUT', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({results:S.results, live:S.live})
+      body: JSON.stringify({results:S.results, live:S.live, ko:S.ko})
     });
     if (!res.ok) throw new Error(res.status);
     syncStatus = 'ok';
@@ -268,16 +324,16 @@ function scheduleSave() {
 }
 
 function startRealtime() {
-  if (es) return;  // already connected — don't restart
+  if (es) return;
   es = new EventSource(dbPath());
   es.addEventListener('put', e => {
     const {data} = JSON.parse(e.data);
     if (!data) return;
-    if (saveTimer) return;  // ignore stale Firebase data while a local save is pending
+    if (saveTimer) return;
     S.results = data.results || {};
     S.live    = data.live    || null;
+    S.ko      = data.ko     || freshKO();
     syncStatus = 'ok'; updateSyncDots();
-    // update DOM directly without full re-render to avoid restarting SSE
     document.getElementById('root').innerHTML =
       S.view==='display' ? renderDisplay() : renderAdmin();
     attachHandlers();
@@ -298,16 +354,22 @@ async function switchTournament(id) {
   stopRealtime();
   currentTour = id;
   localStorage.setItem('udn_tour', id);
-  S.results={}; S.live=null; S.liveHistory=[];
+  S.results={}; S.live=null; S.liveHistory=[]; S.ko=freshKO();
   const data = await pullFromServer();
-  if (data) { S.results=data.results||{}; S.live=data.live||null; }
+  if (data) { S.results=data.results||{}; S.live=data.live||null; S.ko=data.ko||freshKO(); }
   S.view = 'display';
   render();
 }
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 
-const S = { view:'display', adminGroup:'A', results:{}, live:null, liveHistory:[], showTourPicker:false };
+const S = {
+  view:'display', adminGroup:'A', adminTab:'group',
+  displayTab:'groups',
+  results:{}, live:null, liveHistory:[],
+  ko: freshKO(),
+  showTourPicker:false
+};
 
 function freshLive(id) {
   return {matchId:id,games:[0,0],points:[0,0],deuce:false,adv:null,tiebreak:false,tbPoints:[0,0],setWinner:null};
@@ -355,6 +417,58 @@ function undoPoint() {
   scheduleSave(); render();
 }
 
+// ── KO HELPERS ────────────────────────────────────────────────────────────────
+
+function getKOTeams(id) {
+  const slot = S.ko[id] || {t1:'',t2:''};
+  return {t1: slot.t1||'', t2: slot.t2||''};
+}
+
+function getKOMeta(id) {
+  return KO_BRACKET.find(m=>m.id===id);
+}
+
+function koWinner(id) {
+  const res = S.results[id];
+  if (!res) return null;
+  const {t1,t2} = getKOTeams(id);
+  return res.s1>res.s2 ? t1 : t2;
+}
+
+function propagateKOWinners() {
+  // QF winners → SF teams
+  const w = id => koWinner(id);
+  if (w('qf1') || w('qf2')) {
+    if (!S.ko.sf1) S.ko.sf1={t1:'',t2:''};
+    if (w('qf1')) S.ko.sf1.t1 = w('qf1');
+    if (w('qf2')) S.ko.sf1.t2 = w('qf2');
+  }
+  if (w('qf3') || w('qf4')) {
+    if (!S.ko.sf2) S.ko.sf2={t1:'',t2:''};
+    if (w('qf3')) S.ko.sf2.t1 = w('qf3');
+    if (w('qf4')) S.ko.sf2.t2 = w('qf4');
+  }
+  // SF winners → Final teams
+  if (!S.ko.final) S.ko.final={t1:'',t2:''};
+  if (w('sf1')) S.ko.final.t1 = w('sf1');
+  if (w('sf2')) S.ko.final.t2 = w('sf2');
+}
+
+function autoFillQF() {
+  // Seed 1=A1,2=B1,3=C1,4=D1, Seed 5=A2,6=B2,7=C2,8=D2
+  const seed = k => {
+    const st = getStandings(k);
+    return [st[0].team, st[1].team];
+  };
+  const [a1,a2]=seed('A'), [b1,b2]=seed('B'), [c1,c2]=seed('C'), [d1,d2]=seed('D');
+  S.ko.qf1 = {t1:a1, t2:d2}; // S1 vs S8
+  S.ko.qf2 = {t1:b1, t2:c2}; // S2 vs S7
+  S.ko.qf3 = {t1:c1, t2:b2}; // S3 vs S6
+  S.ko.qf4 = {t1:d1, t2:a2}; // S4 vs S5
+  propagateKOWinners();
+  scheduleSave(); render();
+}
+
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 
 function gameScoreDisplay(L,t1,t2) {
@@ -390,8 +504,25 @@ function getStandings(gk) {
 
 function fmtClock(){return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:false});}
 function fmtDate() {return new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});}
-
 function tourLabel() { return TOURNAMENTS.find(t=>t.id===currentTour)?.label || currentTour; }
+
+// ── LIVE MATCH LOOKUP ─────────────────────────────────────────────────────────
+
+function getLiveTeams() {
+  if (!S.live) return null;
+  const id = S.live.matchId;
+  const groupMatch = MATCHES.find(m=>m.id===id);
+  if (groupMatch) {
+    const g = GROUPS[groupMatch.group];
+    return {t1:g.teams[groupMatch.t1], t2:g.teams[groupMatch.t2], context:`${g.label} · ${g.date} · ${g.time}`, isKO:false};
+  }
+  const koMeta = getKOMeta(id);
+  if (koMeta) {
+    const {t1,t2} = getKOTeams(id);
+    return {t1, t2, context:`${koMeta.label} · ${koMeta.date} · ${koMeta.time}`, isKO:true};
+  }
+  return null;
+}
 
 // ── TOURNAMENT PICKER MODAL ───────────────────────────────────────────────────
 
@@ -404,7 +535,7 @@ function renderTourPicker() {
     <div class="modal-label">Tournaments</div>
     <div class="tour-list">
       ${TOURNAMENTS.map(t=>`
-        <div class="tour-item ${t.id===currentTour?'':''}` + `" data-action="pickTour" data-id="${t.id}">
+        <div class="tour-item" data-action="pickTour" data-id="${t.id}">
           <div>
             <div class="tour-item-name">${t.label}</div>
             <div class="tour-item-date">${t.date}</div>
@@ -421,7 +552,8 @@ function renderTourPicker() {
 // ── RENDER: DISPLAY ───────────────────────────────────────────────────────────
 
 function renderDisplay() {
-  const L=S.live, lm=L?MATCHES.find(m=>m.id===L.matchId):null;
+  const liveTeams = getLiveTeams();
+  const showKO = S.displayTab === 'knockout';
   return `
 ${S.showTourPicker ? renderTourPicker() : ''}
 <div id="display-view">
@@ -430,38 +562,48 @@ ${S.showTourPicker ? renderTourPicker() : ''}
       <div class="udaan-mark">U</div>
       <div>
         <div class="banner-title">Udaan Padel Open</div>
-        <div class="banner-sub">Round Robin Group Stage &nbsp;·&nbsp; Top 8 qualify for Quarter Finals</div>
+        <div class="banner-sub">${showKO ? 'Knockout Stage · Sun 19 July' : 'Round Robin Group Stage · Top 8 qualify for Quarter Finals'}</div>
       </div>
     </div>
     <div class="banner-right">
-      <div class="clock" id="clock-el">${fmtClock()}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div class="display-stage-tabs">
+          <button class="dstab ${!showKO?'active':''}" data-action="dispTab" data-tab="groups">Groups</button>
+          <button class="dstab ${showKO?'active':''}" data-action="dispTab" data-tab="knockout">Knockout</button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px">
+        <div class="clock" id="clock-el">${fmtClock()}</div>
+      </div>
       <div class="clock-date">${fmtDate()}</div>
     </div>
   </div>
   <div class="live-board">
-    ${lm ? renderLiveBoard(lm,L) : `
+    ${liveTeams ? renderLiveBoard(liveTeams) : `
       <div class="live-eyebrow"><div class="live-label-text" style="color:var(--muted)">No match in progress</div></div>
       <div class="no-match-msg">Awaiting next match</div>
     `}
   </div>
+  ${showKO ? renderKODisplay() : `
   <div class="standings-grid">
     ${Object.keys(GROUPS).map(k=>renderGroupCard(k)).join('')}
-  </div>
+  </div>`}
 </div>
 <div class="mode-fab">
   <button class="fab-btn" data-action="toAdmin">⚙ ADMIN</button>
 </div>`;
 }
 
-function renderLiveBoard(m,L) {
-  const g=GROUPS[m.group],t1=g.teams[m.t1],t2=g.teams[m.t2];
-  const p1=t1.split(' & '),p2=t2.split(' & ');
+function renderLiveBoard(liveTeams) {
+  const L=S.live;
+  const {t1,t2,context} = liveTeams;
+  const p1=t1.split(' & '), p2=t2.split(' & ');
   const gsd=gameScoreDisplay(L,t1,t2);
   return `
 <div class="live-eyebrow">
   <div class="live-pip"></div>
   <div class="live-label-text">${L.setWinner!==null?'MATCH COMPLETE':'Live'}</div>
-  <div class="live-context">${g.label} &nbsp;·&nbsp; ${g.date} &nbsp;·&nbsp; ${g.time}</div>
+  <div class="live-context">${context}</div>
 </div>
 <div class="score-stage">
   <div class="team-block left">
@@ -481,6 +623,58 @@ function renderLiveBoard(m,L) {
 <div class="game-score-row">
   ${gsd.label?`<div class="game-score-label">${gsd.label}</div>`:''}
   <div class="game-score-value ${gsd.cls}">${gsd.text}</div>
+</div>`;
+}
+
+function renderKODisplay() {
+  const qfs = ['qf1','qf2','qf3','qf4'];
+  const sfs  = ['sf1','sf2'];
+  return `
+<div class="ko-display">
+  <div class="ko-round-col">
+    <div class="ko-round-head">Quarter Finals</div>
+    <div class="ko-round-body">
+      ${qfs.map(id=>renderKOCard(id)).join('')}
+    </div>
+  </div>
+  <div class="ko-round-col">
+    <div class="ko-round-head">Semi Finals</div>
+    <div class="ko-round-body" style="justify-content:space-around">
+      ${sfs.map(id=>renderKOCard(id)).join('')}
+    </div>
+  </div>
+  <div class="ko-round-col">
+    <div class="ko-round-head" style="color:var(--gold)">Final</div>
+    <div class="ko-round-body" style="justify-content:center">
+      ${renderKOCard('final')}
+    </div>
+  </div>
+</div>`;
+}
+
+function renderKOCard(id) {
+  const meta = getKOMeta(id);
+  const {t1,t2} = getKOTeams(id);
+  const res = S.results[id];
+  const isLive = S.live && S.live.matchId===id;
+  const isDone = !!res;
+  const winner = isDone ? (res.s1>res.s2?t1:t2) : null;
+  const t1Cls = isDone?(winner===t1?'winner':''):(t1?'':'tbd');
+  const t2Cls = isDone?(winner===t2?'winner':''):(t2?'':'tbd');
+  return `
+<div class="ko-match-card ${isLive?'is-live':''} ${isDone?'is-done':''}">
+  <div class="ko-match-label">${meta.label}</div>
+  <div class="ko-team-row">
+    <div class="ko-team-name ${t1Cls}">${t1||'TBD'}</div>
+    ${isDone?`<div class="ko-team-score ${winner===t1?'winner':''}">${res.s1}</div>`:''}
+    ${isLive?`<div class="ko-team-score">${S.live.games[0]}</div>`:''}
+  </div>
+  <div class="ko-divider"></div>
+  <div class="ko-team-row">
+    <div class="ko-team-name ${t2Cls}">${t2||'TBD'}</div>
+    ${isDone?`<div class="ko-team-score ${winner===t2?'winner':''}">${res.s2}</div>`:''}
+    ${isLive?`<div class="ko-team-score">${S.live.games[1]}</div>`:''}
+  </div>
 </div>`;
 }
 
@@ -515,6 +709,7 @@ function renderGroupCard(gk) {
 function renderAdmin() {
   stopRealtime();
   const g=GROUPS[S.adminGroup],standings=getStandings(S.adminGroup);
+  const isKOTab = S.adminTab==='knockout';
   return `
 ${S.showTourPicker ? renderTourPicker() : ''}
 <div id="admin-view" style="display:block">
@@ -531,15 +726,21 @@ ${S.showTourPicker ? renderTourPicker() : ''}
   </div>
 
   <div class="admin-group-tabs">
-    ${Object.keys(GROUPS).map(k=>`<button class="atab ${k===S.adminGroup?'active':''}" data-action="setGroup" data-group="${k}">${GROUPS[k].label}</button>`).join('')}
+    ${Object.keys(GROUPS).map(k=>`<button class="atab ${!isKOTab&&k===S.adminGroup?'active':''}" data-action="setGroup" data-group="${k}">${GROUPS[k].label}</button>`).join('')}
+    <button class="atab ko-tab ${isKOTab?'active':''}" data-action="setKOTab">🏆 Knockout</button>
   </div>
 
-  <div class="admin-group-info">${g.date} &nbsp;·&nbsp; ${g.time}</div>
+  ${isKOTab ? renderKnockoutAdmin() : renderGroupAdmin(g, standings)}
+</div>
+<div class="mode-fab"><button class="fab-btn" data-action="toDisplay">📺 DISPLAY</button></div>`;
+}
 
+function renderGroupAdmin(g, standings) {
+  return `
+  <div class="admin-group-info">${g.date} &nbsp;·&nbsp; ${g.time}</div>
   <div class="admin-match-list">
     ${MATCHES.filter(m=>m.group===S.adminGroup).map((m,i)=>renderAdminMatch(m,i+1)).join('')}
   </div>
-
   <div class="admin-standings">
     <div class="admin-standings-title">Standings — ${g.label}</div>
     <table class="admin-st-table">
@@ -553,9 +754,76 @@ ${S.showTourPicker ? renderTourPicker() : ''}
         </tr>`;}).join('')}
       </tbody>
     </table>
+  </div>`;
+}
+
+function renderKnockoutAdmin() {
+  return `
+  <div class="ko-admin-top">
+    <div>
+      <div class="admin-standings-title" style="margin-bottom:4px">Knockout Stage · Sun 19 July</div>
+      <div class="ko-seeding-note">Seeding: 1v8 · 2v7 · 3v6 · 4v5 (Group winners = Seeds 1–4)</div>
+    </div>
+    <button class="act-btn btn-autofill" data-action="autoFillQF">⚡ Auto-fill QF from Standings</button>
   </div>
-</div>
-<div class="mode-fab"><button class="fab-btn" data-action="toDisplay">📺 DISPLAY</button></div>`;
+
+  <div class="ko-section-head">Quarter Finals — 5:30 PM</div>
+  <div class="admin-match-list">
+    ${['qf1','qf2','qf3','qf4'].map((id,i)=>renderKOAdminMatch(id,i+1)).join('')}
+  </div>
+
+  <div class="ko-section-head">Semi Finals — 7:30 PM</div>
+  <div class="admin-match-list">
+    ${['sf1','sf2'].map((id,i)=>renderKOAdminMatch(id,i+1)).join('')}
+  </div>
+
+  <div class="ko-section-head" style="color:var(--gold)">Final — 10:00 PM</div>
+  <div class="admin-match-list">
+    ${renderKOAdminMatch('final',1)}
+  </div>`;
+}
+
+function renderKOAdminMatch(id, idx) {
+  const meta = getKOMeta(id);
+  const {t1,t2} = getKOTeams(id);
+  const res=S.results[id], L=S.live;
+  const isLive=L&&L.matchId===id, isDone=!!res;
+  const canGoLive = t1&&t2&&!isDone&&!(L&&L.matchId!==id);
+  const badge=isLive?`<span class="match-badge badge-live">🔴 Live</span>`:isDone?`<span class="match-badge badge-done">✓ Done</span>`:`<span class="match-badge badge-pending">Pending</span>`;
+  let scoreSection='',actions='';
+  if (isLive) {
+    const setDone=L.setWinner!==null, gs=inlineGameScore(L), canUndo=S.liveHistory.length>0&&!setDone;
+    scoreSection=`<div class="live-scoring-ctrl">
+      <div class="score-summary">
+        <span class="set-score">${L.games[0]} – ${L.games[1]}</span>
+        <span style="color:var(--muted)">GAMES</span><span style="color:var(--muted)">·</span>
+        <span class="game-pts">${gs}</span>
+      </div>
+      <div class="point-btns">
+        <button class="point-btn t1" data-action="pt" data-team="0" ${setDone?'disabled':''}>${(t1||'Team 1').split(' & ')[0]} +</button>
+        <div class="ctrl-sep">vs</div>
+        <button class="point-btn t2" data-action="pt" data-team="1" ${setDone?'disabled':''}>${(t2||'Team 2').split(' & ')[0]} +</button>
+      </div>
+    </div>`;
+    actions=`
+      <button class="act-btn btn-save" data-action="koSave" data-id="${id}" ${!setDone?'disabled':''}>💾 Save</button>
+      <button class="act-btn btn-undo" data-action="undo" ${!canUndo?'disabled':''}>↩ Undo</button>
+      <button class="act-btn btn-stop" data-action="stopLive">■ Stop</button>`;
+  } else if (isDone) {
+    scoreSection=`<div class="done-score">${res.s1} – ${res.s2}</div>`;
+    actions=`<button class="act-btn btn-result" data-action="koUndoResult" data-id="${id}">↩ Undo</button>`;
+  } else {
+    actions=`<button class="act-btn btn-golive" data-action="koGoLive" data-id="${id}" ${!canGoLive?'disabled':''}>▶ Go Live</button>`;
+  }
+  const t1Label = t1 ? `<strong>${t1}</strong>` : `<span class="tbd-team">TBD</span>`;
+  const t2Label = t2 ? `<strong>${t2}</strong>` : `<span class="tbd-team">TBD</span>`;
+  return `
+<div class="admin-match ${isLive?'is-live':''} ${isDone?'is-done':''}">
+  <div class="match-num">${meta.label}</div>
+  <div class="admin-teams">${t1Label}<div class="vs">vs</div>${t2Label}</div>
+  ${badge}${scoreSection}
+  <div class="match-actions">${actions}</div>
+</div>`;
 }
 
 function renderAdminMatch(m,idx) {
@@ -604,12 +872,16 @@ function attachHandlers() {
   document.querySelectorAll('[data-action]').forEach(el=>{
     el.addEventListener('click', async ()=>{
       const a=el.dataset.action;
-      if (a==='toAdmin')    { S.view='admin';   render(); }
-      if (a==='toDisplay')  { S.view='display';  render(); }
-      if (a==='setGroup')   { S.adminGroup=el.dataset.group; render(); }
+      if (a==='toAdmin')    { S.view='admin'; S.adminTab='group'; render(); }
+      if (a==='toDisplay')  { S.view='display'; render(); }
+      if (a==='setGroup')   { S.adminGroup=el.dataset.group; S.adminTab='group'; render(); }
+      if (a==='setKOTab')   { S.adminTab='knockout'; render(); }
+      if (a==='dispTab')    { S.displayTab=el.dataset.tab; render(); }
       if (a==='openPicker') { S.showTourPicker=true; render(); }
       if (a==='closePicker'){ S.showTourPicker=false; render(); }
       if (a==='pickTour')   { S.showTourPicker=false; await switchTournament(el.dataset.id); }
+
+      // Group match actions
       if (a==='goLive')  { S.live=freshLive(el.dataset.id); S.liveHistory=[]; scheduleSave(); render(); }
       if (a==='stopLive'){ S.live=null; S.liveHistory=[]; scheduleSave(); render(); }
       if (a==='pt')      { awardPoint(+el.dataset.team); }
@@ -619,6 +891,22 @@ function attachHandlers() {
         S.live=null; S.liveHistory=[]; scheduleSave(); render();
       }
       if (a==='undoResult') { delete S.results[el.dataset.id]; scheduleSave(); render(); }
+
+      // KO match actions
+      if (a==='autoFillQF') { autoFillQF(); }
+      if (a==='koGoLive')  { S.live=freshLive(el.dataset.id); S.liveHistory=[]; scheduleSave(); render(); }
+      if (a==='koSave')    {
+        const id=el.dataset.id;
+        S.results[id]={s1:S.live.games[0],s2:S.live.games[1]};
+        S.live=null; S.liveHistory=[];
+        propagateKOWinners();
+        scheduleSave(); render();
+      }
+      if (a==='koUndoResult') {
+        delete S.results[el.dataset.id];
+        propagateKOWinners();
+        scheduleSave(); render();
+      }
     });
   });
 }
@@ -641,7 +929,11 @@ function render() {
 
 (async ()=>{
   const data = await pullFromServer();
-  if (data) { S.results=data.results||{}; S.live=data.live||null; }
+  if (data) {
+    S.results = data.results || {};
+    S.live    = data.live    || null;
+    S.ko      = data.ko     || freshKO();
+  }
   render();
 })();
 </script>
