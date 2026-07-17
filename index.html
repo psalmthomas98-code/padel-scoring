@@ -178,6 +178,20 @@ body {
 .d-score-center { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .d-point-label { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: 1px; }
 .d-point-row { display: flex; align-items: center; }
+.d-upcoming-zone { padding:10px 24px; border-top:1px solid var(--border); }
+.d-upcoming-header { font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:rgba(255,255,255,.3); margin-bottom:8px; }
+.d-upcoming-list { display:flex; flex-direction:column; gap:5px; }
+.d-up-row { display:flex; align-items:center; gap:10px; padding:7px 10px; background:rgba(255,255,255,.03); border-radius:7px; border:1px solid rgba(255,255,255,.06); }
+.d-up-badge { font-size:10px; font-weight:800; padding:3px 7px; border-radius:4px; letter-spacing:.5px; flex-shrink:0; }
+.d-up-teams { flex:1; display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; color:var(--chalk); flex-wrap:wrap; }
+.d-up-vs { font-size:9px; color:var(--muted); font-weight:400; }
+.d-up-time { font-size:10px; color:var(--muted); white-space:nowrap; flex-shrink:0; }
+.d-adv-row { display:flex; flex-direction:column; gap:4px; width:100%; }
+.d-adv-team { display:flex; align-items:center; gap:8px; padding:5px 10px; border-radius:6px; }
+.d-adv-team.adv-win { background:rgba(244,107,26,.18); border:1px solid rgba(244,107,26,.4); }
+.d-adv-team.adv-lose { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); opacity:.55; }
+.d-adv-label { font-family:Impact,'Arial Narrow',sans-serif; font-size:clamp(13px,1.8vw,20px); color:var(--fire); letter-spacing:1px; white-space:nowrap; }
+.d-adv-names { font-size:clamp(11px,1.4vw,16px); font-weight:700; color:var(--chalk); letter-spacing:.3px; }
 .d-point-num {
   font-family: Impact,'Arial Narrow',sans-serif;
   font-size: clamp(64px,10vw,120px);
@@ -955,7 +969,16 @@ const S = {
   results:{}, live:null, liveHistory:[],
   ko:freshKO(), sponsors:[], names:defaultNames(), players:defaultPlayers(), presentation:{mode:'standard',matchId:''}
 };
-function getTeam(gk,idx){ return (S.names[gk]&&S.names[gk][idx])||GROUPS[gk].teams[idx]; }
+function getTeam(gk,idx){
+  if(S.players[gk]&&S.players[gk][idx]){
+    const{p1,p2}=S.players[gk][idx];
+    const def=GROUPS[gk].teams[idx].split(' & ');
+    const n1=(p1||'').trim()||def[0]||'';
+    const n2=(p2||'').trim()||def[1]||'';
+    return n2?n1+' & '+n2:n1;
+  }
+  return (S.names[gk]&&S.names[gk][idx])||GROUPS[gk].teams[idx];
+}
 function freshLive(id) {
   return {matchId:id,games:[0,0],points:[0,0],deuce:false,adv:null,goldenPoint:false,tiebreak:false,tbPoints:[0,0],setWinner:null};
 }
@@ -1123,6 +1146,25 @@ function renderWinnerDisplay(details){
   </div>`;
 }
 
+function renderUpcoming(){
+  const liveId=S.live?.matchId;
+  // Group stage: unplayed, non-live matches
+  const upcoming=MATCHES.filter(m=>!S.results[m.id]&&m.id!==liveId).slice(0,5);
+  if(!upcoming.length) return '';
+  const rows=upcoming.map(m=>{
+    const g=GROUPS[m.group];
+    const t1=getTeam(m.group,m.t1), t2=getTeam(m.group,m.t2);
+    return`<div class="d-up-row">
+      <div class="d-up-badge" style="background:${g.color}22;color:${g.color};border:1px solid ${g.color}44">${g.letter}</div>
+      <div class="d-up-teams"><span>${t1}</span><span class="d-up-vs">vs</span><span>${t2}</span></div>
+      <div class="d-up-time">${g.time}</div>
+    </div>`;
+  }).join('');
+  return`<div class="d-upcoming-zone">
+  <div class="d-upcoming-header">UP NEXT</div>
+  <div class="d-upcoming-list">${rows}</div>
+</div>`;
+}
 function renderDisplay(){
   if(S.presentation?.mode==='winner'){
     const details=getCompletedMatchDetails(S.presentation.matchId);
@@ -1170,6 +1212,9 @@ ${S.showTourPicker?renderTourPicker():''}
     </div>
   </div>
 
+  <!-- Upcoming matches -->
+  ${renderUpcoming()}
+
   <!-- Standings / KO -->
   <div class="d-standings-zone">
     ${showKO?renderKODisplay():`
@@ -1211,9 +1256,18 @@ function renderDisplayLiveBoard(liveTeams){
     if(L.goldenPoint){
       centerHtml=`<div class="d-status-big golden">⚡ GOLDEN POINT</div>`;
     } else if(L.adv!==null){
-      const advName=(L.adv===0?p1:p2)[0];
+      const advTeam=L.adv===0?p1:p2;
+      const oppTeam=L.adv===0?p2:p1;
       centerHtml=`<div class="d-point-label">ADVANTAGE</div>
-      <div class="d-point-row"><div class="d-point-num adv" style="min-width:auto;padding:0 16px">${advName}</div></div>`;
+      <div class="d-adv-row">
+        <div class="d-adv-team adv-win">
+          <div class="d-adv-label">AD</div>
+          <div class="d-adv-names">${advTeam.join(' & ')}</div>
+        </div>
+        <div class="d-adv-team adv-lose">
+          <div class="d-adv-names">${oppTeam.join(' & ')}</div>
+        </div>
+      </div>`;
     } else {
       centerHtml=`<div class="d-status-big deuce">DEUCE</div>`;
     }
