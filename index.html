@@ -900,12 +900,18 @@ function startRealtime() {
     const {data}=JSON.parse(e.data); if(!data) return;
     if(saveTimer) return; // this device is mid-save; skip to avoid overwriting local state
     if(S.live && S.adminOpen) return; // this device is actively scoring
-    S.results=data.results||{}; S.live=data.live||null;
+    S.results=data.results||{};
+    // Firebase drops null fields (adv, setWinner) — restore them so renderDisplay works correctly
+    S.live=data.live ? Object.assign({setWinner:null,adv:null},data.live) : null;
     S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames(); S.players=data.players||defaultPlayers();
     S.presentation=data.presentation||{mode:'standard',matchId:''};
     syncStatus='ok'; updateSyncDots();
-    document.getElementById('root').innerHTML=renderDisplay();
-    renderOverlays(); // renderOverlays calls attachHandlers() — do NOT call again
+    try {
+      document.getElementById('root').innerHTML=renderDisplay();
+      renderOverlays(); // renderOverlays calls attachHandlers() — do NOT call again
+    } catch(err) {
+      console.error('SSE render error:',err.message,err.stack);
+    }
   });
   es.onerror=()=>{
     syncStatus='error'; updateSyncDots();
