@@ -1310,7 +1310,7 @@ function renderKOAdminMatch(id,idx){
   const badge=isLive?`<span class="match-badge badge-live">🔴 Live</span>`:isDone?`<span class="match-badge badge-done">✓ Done</span>`:`<span class="match-badge badge-pending">Pending</span>`;
   let ss='',actions='';
   if(isLive){
-    const sd=L.setWinner!==null,gs=inlineGameScore(L),cu=S.liveHistory.length>0&&!sd;
+    const sd=L.setWinner!==null,gs=inlineGameScore(L),cu=S.liveHistory.length>0;
     ss=`<div class="live-scoring-ctrl">
       <div class="score-summary"><span class="set-score">${L.games[0]}–${L.games[1]}</span><span style="color:var(--muted)">·</span><span class="game-pts">${gs}</span></div>
       <div class="point-btns">
@@ -1342,7 +1342,7 @@ function renderAdminMatch(m,idx){
   const badge=isLive?`<span class="match-badge badge-live">🔴 Live</span>`:isDone?`<span class="match-badge badge-done">✓ Done</span>`:`<span class="match-badge badge-pending">Pending</span>`;
   let ss='',actions='';
   if(isLive){
-    const sd=L.setWinner!==null,gs=inlineGameScore(L),cu=S.liveHistory.length>0&&!sd;
+    const sd=L.setWinner!==null,gs=inlineGameScore(L),cu=S.liveHistory.length>0;
     ss=`<div class="live-scoring-ctrl">
       <div class="score-summary"><span class="set-score">${L.games[0]}–${L.games[1]}</span><span style="color:var(--muted)">·</span><span class="game-pts">${gs}</span></div>
       <div class="point-btns">
@@ -1509,9 +1509,8 @@ function render(){
     document.getElementById('root').innerHTML=`<div style="color:red;padding:20px">Render error: ${e.message}</div>`;
     console.error('render error',e);
   }
-  renderOverlays();
+  renderOverlays(); // renderOverlays already calls attachHandlers()
   startRealtime();
-  attachHandlers();
 }
 function renderOverlays(){
   try {
