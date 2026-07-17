@@ -51,9 +51,15 @@ body {
 .sync-status { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; }
 
 /* ── FAB ── */
-.mode-fab { position: fixed; bottom: 14px; right: 14px; z-index: 300; }
-.fab-btn { background: rgba(10,8,8,.85); border: 1px solid rgba(244,107,26,.4); color: var(--fire); padding: 8px 16px; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; backdrop-filter: blur(4px); }
+.mode-fab { position: fixed; bottom: 14px; right: 14px; z-index: 300; display: flex; gap: 8px; }
+.fab-btn { background: rgba(10,8,8,.88); border: 1px solid rgba(244,107,26,.4); color: var(--fire); padding: 8px 16px; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; backdrop-filter: blur(6px); }
 .fab-btn:hover { background: var(--fire); color: white; }
+.fab-btn.lock { border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.5); }
+.fab-btn.lock:hover { background: rgba(255,255,255,.1); color: white; }
+/* PIN modal */
+.pin-input { width: 100%; background: var(--raised); border: 1px solid var(--border); color: var(--chalk); padding: 14px 16px; font-size: 28px; font-family: Impact,'Arial Narrow',sans-serif; letter-spacing: 12px; text-align: center; outline: none; margin-bottom: 12px; }
+.pin-input:focus { border-color: var(--fire); }
+.pin-error { color: var(--loss); font-size: 11px; letter-spacing: 1px; text-align: center; margin-bottom: 8px; min-height: 16px; }
 
 /* ═══════════════════════════════════════════════════════
    DISPLAY VIEW — CINEMATIC DARK COURT THEME
@@ -279,9 +285,15 @@ body {
 .d-sponsor-empty { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.2); }
 
 /* ═══════════════════════════════════════════════════════
-   ADMIN VIEW — DARK
+   ADMIN PANEL — slides in over display view
 ═══════════════════════════════════════════════════════ */
-#admin-view { height: 100vh; overflow-y: auto; padding: 16px; display: none; }
+#admin-panel {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(5,3,2,.96);
+  overflow-y: auto; padding: 16px;
+  display: none;
+}
+#admin-panel.open { display: block; }
 .admin-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); gap: 12px; flex-wrap: wrap; }
 .admin-title { font-family: Impact,'Arial Narrow',sans-serif; font-size: 20px; letter-spacing: 3px; text-transform: uppercase; color: var(--fire); }
 .admin-topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -425,15 +437,12 @@ function startRealtime() {
   es=new EventSource(dbPath());
   es.addEventListener('put',e=>{
     const {data}=JSON.parse(e.data); if(!data) return; if(saveTimer) return;
-    // If admin has a live match in progress, don't let SSE overwrite local scoring state
-    const adminLive = S.view==='admin' && S.live;
-    S.results=data.results||{};
+    // Don't overwrite local scoring state while a live match is being scored
+    if(S.live) return;
+    S.results=data.results||{}; S.live=data.live||null;
     S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[];
-    if(!adminLive) S.live=data.live||null;
     syncStatus='ok'; updateSyncDots();
-    // Don't re-render admin mid-match — it clears liveHistory and disrupts scoring
-    if(adminLive) return;
-    document.getElementById('root').innerHTML=S.view==='display'?renderDisplay():renderAdmin();
+    document.getElementById('root').innerHTML=renderMain();
     attachHandlers();
   });
   es.onerror=()=>{syncStatus='error';updateSyncDots();};
@@ -448,14 +457,16 @@ async function switchTournament(id) {
   S.results={}; S.live=null; S.liveHistory=[]; S.ko=freshKO(); S.sponsors=[];
   const data=await pullFromServer();
   if(data){S.results=data.results||{};S.live=data.live||null;S.ko=data.ko||freshKO();S.sponsors=data.sponsors||[];}
-  S.view='display'; render();
+  S.adminOpen=false; render();
 }
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
+const ADMIN_PIN = '1818';
 const S = {
-  view:'display', adminGroup:'A', adminTab:'group', displayTab:'groups',
+  authed:false, adminOpen:false, adminGroup:'A', adminTab:'group', displayTab:'groups',
+  showPIN:false, pinError:'', showTourPicker:false,
   results:{}, live:null, liveHistory:[],
-  ko:freshKO(), sponsors:[], showTourPicker:false
+  ko:freshKO(), sponsors:[]
 };
 function freshLive(id) {
   return {matchId:id,games:[0,0],points:[0,0],deuce:false,adv:null,goldenPoint:false,tiebreak:false,tbPoints:[0,0],setWinner:null};
@@ -646,7 +657,58 @@ ${S.showTourPicker?renderTourPicker():''}
     }
   </div>
 </div>
-<div class="mode-fab"><button class="fab-btn" data-action="toAdmin">⚙ ADMIN</button></div>`;
+`;
+}
+
+function renderFAB(){
+  if(S.authed){
+    return`<div class="mode-fab">
+      <button class="fab-btn" data-action="openAdmin">⚙ MANAGE</button>
+      <button class="fab-btn lock" data-action="lockAdmin">🔒 Lock</button>
+    </div>`;
+  }
+  return`<div class="mode-fab"><button class="fab-btn" data-action="showPIN">🔒 ADMIN</button></div>`;
+}
+
+function renderPINModal(){
+  if(!S.showPIN) return '';
+  return`<div class="modal-overlay" id="pin-modal">
+  <div class="modal-box">
+    <div class="modal-title">Admin Access</div>
+    <div class="modal-sub">Enter your PIN to manage scores and settings.</div>
+    <input class="pin-input" id="pin-field" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off"/>
+    <div class="pin-error" id="pin-error">${S.pinError}</div>
+    <button class="modal-btn" data-action="submitPIN">Unlock</button>
+    <button class="modal-btn" style="background:var(--raised);color:var(--muted);border:1px solid var(--border);margin-top:4px" data-action="closePIN">Cancel</button>
+  </div>
+</div>`;
+}
+
+function renderAdminPanel(){
+  if(!S.adminOpen) return '';
+  const isKO=S.adminTab==='knockout', isSP=S.adminTab==='sponsors';
+  const g=GROUPS[S.adminGroup], standings=getStandings(S.adminGroup);
+  return`<div id="admin-panel" class="open">
+  <div class="admin-topbar">
+    <div>
+      <div class="admin-title">⚙ Manage</div>
+      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:3px">${tourLabel()}</div>
+    </div>
+    <div class="admin-topbar-right">
+      <div class="sync-status"><span class="sync-dot ${syncStatus}"></span><span class="sync-text">${syncStatus==='ok'?'Live':syncStatus==='saving'?'Saving…':'Connection error'}</span></div>
+      <button class="act-btn btn-switch" data-action="openPicker">⇄ Switch Tournament</button>
+      <button class="act-btn btn-display" data-action="closeAdmin">✕ Close</button>
+    </div>
+  </div>
+  <div class="admin-group-tabs">
+    ${Object.keys(GROUPS).map(k=>`<button class="atab ${!isKO&&!isSP&&k===S.adminGroup?'active':''}" data-action="setGroup" data-group="${k}">${GROUPS[k].label}</button>`).join('')}
+    <button class="atab ko-tab ${isKO?'active':''}" data-action="setKOTab">🏆 Knockout</button>
+    <button class="atab sp-tab ${isSP?'active':''}" data-action="setSPTab">🖼 Sponsors</button>
+  </div>
+  ${isKO?renderKnockoutAdmin():isSP?renderSponsorsAdmin():renderGroupAdmin(g,standings)}
+  ${S.showTourPicker?renderTourPicker():''}
+</div>`;
+}
 }
 
 function renderDisplayLiveBoard(liveTeams){
@@ -702,12 +764,12 @@ function renderDisplayLiveBoard(liveTeams){
   </div>
   <div class="d-team-block right">${p2.map(n=>`<div class="d-team-player">${n}</div>`).join('')}</div>
 </div>
-<div class="d-score-btns">
+${S.authed?`<div class="d-score-btns">
   <button class="d-pt-btn t1" data-action="pt" data-team="0" ${setDone?'disabled':''}>+ ${p1.join(' & ')}</button>
   <button class="d-undo-btn" data-action="undo" ${!canUndo?'disabled':''}>↩ Undo</button>
   <button class="d-pt-btn t2" data-action="pt" data-team="1" ${setDone?'disabled':''}>+ ${p2.join(' & ')}</button>
 </div>
-${setDone?`<button class="d-save-btn" data-action="dispSave" data-id="${L.matchId}">💾 Save Result & Close</button>`:''}`;
+${setDone?`<button class="d-save-btn" data-action="dispSave" data-id="${L.matchId}">💾 Save Result & Close</button>`:''}`:''}`;
 }
 
 function renderDisplayGroupCard(gk){
@@ -782,32 +844,6 @@ function renderKODisplay(){
 }
 
 // ── RENDER: ADMIN ─────────────────────────────────────────────────────────────
-function renderAdmin(){
-  const g=GROUPS[S.adminGroup],standings=getStandings(S.adminGroup);
-  const isKO=S.adminTab==='knockout', isSP=S.adminTab==='sponsors';
-  return`
-${S.showTourPicker?renderTourPicker():''}
-<div id="admin-view" style="display:block">
-  <div class="admin-topbar">
-    <div>
-      <div class="admin-title">⚙ Admin</div>
-      <div style="font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:3px">${tourLabel()}</div>
-    </div>
-    <div class="admin-topbar-right">
-      <div class="sync-status"><span class="sync-dot ${syncStatus}"></span><span class="sync-text">${syncStatus==='ok'?'Live':syncStatus==='saving'?'Saving…':'Connection error'}</span></div>
-      <button class="act-btn btn-switch" data-action="openPicker">⇄ Switch Tournament</button>
-      <button class="act-btn btn-display" data-action="toDisplay">📺 Display</button>
-    </div>
-  </div>
-  <div class="admin-group-tabs">
-    ${Object.keys(GROUPS).map(k=>`<button class="atab ${!isKO&&!isSP&&k===S.adminGroup?'active':''}" data-action="setGroup" data-group="${k}">${GROUPS[k].label}</button>`).join('')}
-    <button class="atab ko-tab ${isKO?'active':''}" data-action="setKOTab">🏆 Knockout</button>
-    <button class="atab sp-tab ${isSP?'active':''}" data-action="setSPTab">🖼 Sponsors</button>
-  </div>
-  ${isKO?renderKnockoutAdmin():isSP?renderSponsorsAdmin():renderGroupAdmin(g,standings)}
-</div>
-<div class="mode-fab"><button class="fab-btn" data-action="toDisplay">📺 DISPLAY</button></div>`;
-}
 
 function renderSponsorsAdmin(){
   return`
@@ -956,8 +992,16 @@ function attachHandlers(){
       return;
     }
     el.addEventListener('click',async()=>{
-      if(a==='toAdmin')    {S.view='admin';S.adminTab='group';render();}
-      if(a==='toDisplay')  {S.view='display';render();}
+      if(a==='showPIN')    {S.showPIN=true;S.pinError='';render();setTimeout(()=>document.getElementById('pin-field')?.focus(),50);}
+      if(a==='closePIN')   {S.showPIN=false;render();}
+      if(a==='submitPIN')  {
+        const val=document.getElementById('pin-field')?.value||'';
+        if(val===ADMIN_PIN){S.authed=true;S.showPIN=false;S.adminOpen=true;S.pinError='';render();}
+        else{S.pinError='Incorrect PIN. Try again.';document.getElementById('pin-error').textContent=S.pinError;document.getElementById('pin-field').value='';document.getElementById('pin-field').focus();}
+      }
+      if(a==='lockAdmin')  {S.authed=false;S.adminOpen=false;render();}
+      if(a==='openAdmin')  {S.adminOpen=true;render();}
+      if(a==='closeAdmin') {S.adminOpen=false;render();}
       if(a==='setGroup')   {S.adminGroup=el.dataset.group;S.adminTab='group';render();}
       if(a==='setKOTab')   {S.adminTab='knockout';render();}
       if(a==='setSPTab')   {S.adminTab='sponsors';render();}
@@ -991,9 +1035,19 @@ function attachHandlers(){
 // ── CLOCK ─────────────────────────────────────────────────────────────────────
 setInterval(()=>{const el=document.getElementById('clock-el');if(el)el.textContent=fmtClock();},1000);
 
+// ── PIN enter key ─────────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('pin-field')===document.activeElement){
+    document.querySelector('[data-action="submitPIN"]')?.click();
+  }
+});
+
 // ── RENDER ────────────────────────────────────────────────────────────────────
+function renderMain(){
+  return renderDisplay() + renderAdminPanel() + renderPINModal() + renderFAB();
+}
 function render(){
-  document.getElementById('root').innerHTML=S.view==='display'?renderDisplay():renderAdmin();
+  document.getElementById('root').innerHTML=renderMain();
   attachHandlers();
   startRealtime();
 }
