@@ -887,8 +887,8 @@ function startRealtime() {
   es=new EventSource(dbPath());
   es.addEventListener('put',e=>{
     const {data}=JSON.parse(e.data); if(!data) return; if(saveTimer) return;
-    // If admin has a live match in progress, don't let SSE overwrite local scoring state
-    if(S.live) return;
+    // Only skip SSE if THIS device is actively scoring (admin panel open with live match)
+    if(S.live && S.adminOpen) return;
     S.results=data.results||{}; S.live=data.live||null;
     S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames();
     syncStatus='ok'; updateSyncDots();
