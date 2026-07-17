@@ -104,22 +104,22 @@ body {
 .team-block.right { align-items: flex-start; }
 .team-player { font-size: clamp(14px,1.8vw,22px); font-weight: 700; color: var(--chalk); line-height: 1.15; }
 
-/* center column: point score big on top, game score smaller below */
-.score-center { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+/* center column: point score BIG, game score small */
+.score-center { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .point-score { display: flex; align-items: center; gap: 0; }
-.point-digit { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(42px,7vw,88px); font-variant-numeric: tabular-nums; line-height: 1; min-width: clamp(50px,5.5vw,80px); text-align: center; }
-.point-digit.normal { color: var(--chalk); text-shadow: 0 0 30px rgba(238,242,247,.15); }
+.point-digit { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(64px,11vw,130px); font-variant-numeric: tabular-nums; line-height: 1; min-width: clamp(70px,8vw,110px); text-align: center; }
+.point-digit.normal { color: var(--chalk); }
 .point-digit.deuce  { color: var(--chalk); }
-.point-digit.adv    { color: var(--gold); text-shadow: 0 0 30px rgba(240,180,41,.4); }
-.point-digit.tb     { color: var(--gold); text-shadow: 0 0 30px rgba(240,180,41,.4); }
-.point-digit.done   { color: var(--win); font-size: clamp(18px,2.5vw,32px); letter-spacing: 3px; text-transform: uppercase; }
-.point-dash { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(28px,4vw,56px); color: var(--dim); padding: 0 6px; line-height: 1; }
-.point-label { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); }
+.point-digit.adv    { color: var(--gold); text-shadow: 0 0 40px rgba(240,180,41,.5); }
+.point-digit.tb     { color: var(--gold); text-shadow: 0 0 40px rgba(240,180,41,.5); }
+.point-digit.done   { color: var(--win); font-size: clamp(18px,2.5vw,30px); letter-spacing: 3px; text-transform: uppercase; }
+.point-dash { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(44px,7vw,90px); color: var(--dim); padding: 0 8px; line-height: 1; }
+.point-label { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
 
-.game-score-row { display: flex; align-items: center; gap: 6px; padding-top: 4px; border-top: 1px solid var(--border); }
-.game-score-label { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); }
-.game-digit { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(22px,3.5vw,42px); color: var(--fire); font-variant-numeric: tabular-nums; line-height: 1; min-width: clamp(24px,3vw,38px); text-align: center; text-shadow: 0 0 20px rgba(244,107,26,.3); }
-.game-dash  { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(16px,2vw,28px); color: var(--dim); padding: 0 4px; line-height: 1; }
+.game-score-row { display: flex; align-items: center; gap: 5px; padding-top: 3px; border-top: 1px solid var(--border); margin-top: 2px; }
+.game-score-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.game-digit { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(16px,2.2vw,26px); color: var(--fire); font-variant-numeric: tabular-nums; line-height: 1; min-width: clamp(16px,2vw,24px); text-align: center; }
+.game-dash  { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(12px,1.5vw,18px); color: var(--dim); padding: 0 3px; line-height: 1; }
 
 .no-match-msg { text-align: center; color: var(--muted); font-size: 14px; letter-spacing: 3px; text-transform: uppercase; padding: 8px 0; }
 
