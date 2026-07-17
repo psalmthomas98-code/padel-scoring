@@ -89,32 +89,38 @@ body {
 .clock { font-family: Impact,'Arial Narrow',sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--gold); font-variant-numeric: tabular-nums; line-height: 1; }
 .clock-date { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
 
-.live-board { background: var(--surface); border: 1px solid var(--border); padding: 14px 24px 16px; position: relative; }
+.live-board { background: var(--surface); border: 1px solid var(--border); padding: 10px 20px 12px; position: relative; }
 .live-board::before { content:''; position: absolute; inset:0; border-left: 4px solid var(--fire); pointer-events: none; }
-.live-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.live-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .live-pip { width: 8px; height: 8px; background: var(--fire); border-radius: 50%; animation: pulse 1.4s ease-in-out infinite; flex-shrink: 0; }
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
 .live-label-text { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--fire); }
 .live-context { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-left: auto; }
 
-.score-stage { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; }
-.team-block { display: flex; flex-direction: column; }
+/* live board layout: teams left/right, point score center-big, game score below smaller */
+.live-main { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; }
+.team-block { display: flex; flex-direction: column; gap: 3px; }
 .team-block.left  { align-items: flex-end; text-align: right; }
 .team-block.right { align-items: flex-start; }
-.team-display-name { font-size: clamp(16px,2.2vw,28px); font-weight: 700; line-height: 1.1; }
-.team-players { font-size: clamp(11px,1.2vw,15px); color: var(--muted); margin-top: 3px; }
-.score-bug { display: flex; align-items: center; }
-.score-digit { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(56px,10vw,110px); color: var(--fire); font-variant-numeric: tabular-nums; line-height: 1; min-width: clamp(60px,7vw,90px); text-align: center; text-shadow: 0 0 40px rgba(244,107,26,.35); }
-.score-dash { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(36px,5vw,64px); color: var(--dim); padding: 0 8px; line-height: 1; }
+.team-player { font-size: clamp(14px,1.8vw,22px); font-weight: 700; color: var(--chalk); line-height: 1.15; }
 
-.game-score-row { margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; border-top: 1px solid var(--border); padding-top: 10px; }
-.game-score-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
-.game-score-value { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(20px,3.5vw,40px); font-variant-numeric: tabular-nums; letter-spacing: 2px; line-height: 1; }
-.game-score-value.normal { color: var(--muted); }
-.game-score-value.deuce  { color: var(--chalk); }
-.game-score-value.adv    { color: var(--gold); }
-.game-score-value.tb     { color: var(--gold); }
-.game-score-value.done   { color: var(--win); font-size: clamp(14px,2vw,24px); letter-spacing: 3px; text-transform: uppercase; }
+/* center column: point score big on top, game score smaller below */
+.score-center { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.point-score { display: flex; align-items: center; gap: 0; }
+.point-digit { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(42px,7vw,88px); font-variant-numeric: tabular-nums; line-height: 1; min-width: clamp(50px,5.5vw,80px); text-align: center; }
+.point-digit.normal { color: var(--chalk); text-shadow: 0 0 30px rgba(238,242,247,.15); }
+.point-digit.deuce  { color: var(--chalk); }
+.point-digit.adv    { color: var(--gold); text-shadow: 0 0 30px rgba(240,180,41,.4); }
+.point-digit.tb     { color: var(--gold); text-shadow: 0 0 30px rgba(240,180,41,.4); }
+.point-digit.done   { color: var(--win); font-size: clamp(18px,2.5vw,32px); letter-spacing: 3px; text-transform: uppercase; }
+.point-dash { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(28px,4vw,56px); color: var(--dim); padding: 0 6px; line-height: 1; }
+.point-label { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); }
+
+.game-score-row { display: flex; align-items: center; gap: 6px; padding-top: 4px; border-top: 1px solid var(--border); }
+.game-score-label { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); }
+.game-digit { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(22px,3.5vw,42px); color: var(--fire); font-variant-numeric: tabular-nums; line-height: 1; min-width: clamp(24px,3vw,38px); text-align: center; text-shadow: 0 0 20px rgba(244,107,26,.3); }
+.game-dash  { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(16px,2vw,28px); color: var(--dim); padding: 0 4px; line-height: 1; }
+
 .no-match-msg { text-align: center; color: var(--muted); font-size: 14px; letter-spacing: 3px; text-transform: uppercase; padding: 8px 0; }
 
 .standings-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; min-height: 0; overflow: hidden; }
@@ -136,7 +142,12 @@ body {
 .gd-neg { color: var(--loss); font-weight: 700; }
 .gd-zero { color: var(--muted); }
 .top2 .rank-cell { color: var(--gold); }
-.match-progress { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: center; padding: 5px 8px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.match-progress { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: center; padding: 4px 8px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.match-results-wrap { border-top: 1px solid var(--border); flex-shrink: 0; max-height: 72px; overflow: hidden; }
+.match-result-row { display: flex; align-items: center; justify-content: space-between; padding: 3px 8px; gap: 4px; border-bottom: 1px solid rgba(37,46,61,.6); }
+.match-result-row:last-child { border-bottom: none; }
+.mr-teams { font-size: 9px; color: var(--muted); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mr-score { font-family: Impact,'Arial Narrow',sans-serif; font-size: 13px; color: var(--chalk); font-variant-numeric: tabular-nums; flex-shrink: 0; letter-spacing: 1px; }
 
 /* ── KNOCKOUT DISPLAY ── */
 .ko-display { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; min-height: 0; overflow: hidden; }
@@ -390,9 +401,8 @@ function awardPoint(team) {
     scheduleSave(); render(); return;
   }
   if (L.deuce) {
-    if (L.adv===null) L.adv=team;
-    else if (L.adv===team) winGame(team);
-    else L.adv=null;
+    if (L.adv===null) { L.adv=team; }          // first point after deuce → advantage
+    else { winGame(team); }                      // golden point: whoever scores wins
     scheduleSave(); render(); return;
   }
   L.points[team]++;
@@ -599,30 +609,53 @@ function renderLiveBoard(liveTeams) {
   const {t1,t2,context} = liveTeams;
   const p1=t1.split(' & '), p2=t2.split(' & ');
   const gsd=gameScoreDisplay(L,t1,t2);
+
+  // point score display
+  let ptLeft='', ptRight='', ptCls='normal', ptLabel='';
+  if (L.setWinner!==null) {
+    ptLeft=ptRight=''; ptCls='done'; ptLabel='SET COMPLETE';
+  } else if (L.tiebreak) {
+    ptLeft=`${L.tbPoints[0]}`; ptRight=`${L.tbPoints[1]}`; ptCls='tb'; ptLabel='TIEBREAK';
+  } else if (L.deuce) {
+    if (L.adv===0)      { ptLeft='ADV'; ptRight=''; ptCls='adv'; ptLabel='ADVANTAGE'; }
+    else if (L.adv===1) { ptLeft=''; ptRight='ADV'; ptCls='adv'; ptLabel='ADVANTAGE'; }
+    else                { ptLeft=ptRight='DEUCE'; ptCls='deuce'; ptLabel=''; }
+  } else {
+    ptLeft=POINT_LABELS[L.points[0]]; ptRight=POINT_LABELS[L.points[1]]; ptCls='normal'; ptLabel='CURRENT GAME';
+  }
+
+  const isDeuce = L.deuce && L.adv===null;
+  const isSetDone = L.setWinner!==null;
+
   return `
 <div class="live-eyebrow">
   <div class="live-pip"></div>
-  <div class="live-label-text">${L.setWinner!==null?'MATCH COMPLETE':'Live'}</div>
+  <div class="live-label-text">${isSetDone?'MATCH COMPLETE':'LIVE'}</div>
   <div class="live-context">${context}</div>
 </div>
-<div class="score-stage">
+<div class="live-main">
   <div class="team-block left">
-    <div class="team-display-name">${p1[0]}</div>
-    ${p1[1]?`<div class="team-players">& ${p1[1]}</div>`:''}
+    ${p1.map(n=>`<div class="team-player">${n}</div>`).join('')}
   </div>
-  <div class="score-bug">
-    <div class="score-digit">${L.games[0]}</div>
-    <div class="score-dash">–</div>
-    <div class="score-digit">${L.games[1]}</div>
+  <div class="score-center">
+    ${ptLabel?`<div class="point-label">${ptLabel}</div>`:''}
+    ${isDeuce ? `<div class="point-digit deuce">DEUCE</div>` :
+      isSetDone ? `<div class="point-digit done">SET COMPLETE</div>` :
+      `<div class="point-score">
+        <div class="point-digit ${ptCls}">${ptLeft}</div>
+        <div class="point-dash">–</div>
+        <div class="point-digit ${ptCls}">${ptRight}</div>
+      </div>`}
+    <div class="game-score-row">
+      <div class="game-score-label">GAMES</div>
+      <div class="game-digit">${L.games[0]}</div>
+      <div class="game-dash">–</div>
+      <div class="game-digit">${L.games[1]}</div>
+    </div>
   </div>
   <div class="team-block right">
-    <div class="team-display-name">${p2[0]}</div>
-    ${p2[1]?`<div class="team-players">& ${p2[1]}</div>`:''}
+    ${p2.map(n=>`<div class="team-player">${n}</div>`).join('')}
   </div>
-</div>
-<div class="game-score-row">
-  ${gsd.label?`<div class="game-score-label">${gsd.label}</div>`:''}
-  <div class="game-score-value ${gsd.cls}">${gsd.text}</div>
 </div>`;
 }
 
@@ -680,8 +713,19 @@ function renderKOCard(id) {
 
 function renderGroupCard(gk) {
   const g=GROUPS[gk],standings=getStandings(gk);
-  const total=MATCHES.filter(m=>m.group===gk).length;
-  const done=MATCHES.filter(m=>m.group===gk&&S.results[m.id]).length;
+  const groupMatches=MATCHES.filter(m=>m.group===gk);
+  const played=groupMatches.filter(m=>S.results[m.id]);
+  const total=groupMatches.length;
+  const resultsHtml = played.length ? played.map(m=>{
+    const r=S.results[m.id];
+    const t1=g.teams[m.t1].split(' & ')[0], t2=g.teams[m.t2].split(' & ')[0];
+    const w1=r.s1>r.s2, w2=r.s2>r.s1;
+    return `<div class="match-result-row">
+      <div class="mr-teams" style="color:${w1?'var(--chalk)':'var(--muted)'}">${t1}</div>
+      <div class="mr-score">${r.s1}–${r.s2}</div>
+      <div class="mr-teams" style="text-align:right;color:${w2?'var(--chalk)':'var(--muted)'}">${t2}</div>
+    </div>`;
+  }).join('') : '';
   return `
 <div class="group-card">
   <div class="group-card-head" style="border-left:3px solid ${g.color}">
@@ -700,7 +744,8 @@ function renderGroupCard(gk) {
       </tbody>
     </table>
   </div>
-  <div class="match-progress">${done} / ${total} played</div>
+  <div class="match-progress">${played.length} / ${total} played</div>
+  ${resultsHtml ? `<div class="match-results-wrap">${resultsHtml}</div>` : ''}
 </div>`;
 }
 
