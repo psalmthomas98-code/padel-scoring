@@ -1033,6 +1033,101 @@ button:active, .atab:active, .dstab:active {
   .d-clock { font-size: 23px; }
 }
 
+/* ── GOLDEN POINT MOMENT ──────────────────────────────────────────────────── */
+.d-score-layout.golden-active {
+  grid-template-columns: minmax(0,1fr) minmax(300px,.9fr) minmax(0,1fr);
+}
+.golden-moment {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 66px minmax(0,1fr);
+  align-items: center;
+  gap: 14px;
+  width: min(420px,100%);
+  min-height: 108px;
+  padding: 13px 18px 13px 14px;
+  overflow: hidden;
+  border: 1px solid rgba(240,180,41,.72);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 18% 50%, rgba(240,180,41,.20), transparent 32%),
+    linear-gradient(135deg, rgba(63,42,10,.92), rgba(17,13,8,.97) 52%, rgba(35,20,7,.96));
+  box-shadow: 0 14px 38px rgba(0,0,0,.38), 0 0 34px rgba(240,180,41,.13), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.golden-moment::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: .33;
+  background: repeating-linear-gradient(118deg, transparent 0 46px, rgba(255,255,255,.055) 47px 48px);
+}
+.golden-moment::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  left: 18%;
+  right: 8%;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), #fff1a7, var(--gold), transparent);
+  box-shadow: 0 0 12px rgba(240,180,41,.6);
+}
+.golden-emblem {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  border: 1px solid rgba(240,180,41,.55);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,180,41,.22), rgba(240,180,41,.04) 58%, transparent 60%);
+  box-shadow: 0 0 0 7px rgba(240,180,41,.045), 0 0 25px rgba(240,180,41,.16);
+}
+.golden-emblem::before,
+.golden-emblem::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 1px solid rgba(240,180,41,.18);
+  border-radius: 50%;
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  transform: rotate(18deg);
+}
+.golden-emblem::after { inset: 6px; border-color: rgba(255,241,167,.22); border-right-color: transparent; transform: rotate(-25deg); }
+.golden-emblem span { color: #ffd450; font-size: 28px; line-height: 1; filter: drop-shadow(0 0 8px rgba(240,180,41,.7)); }
+.golden-copy { min-width: 0; text-align: left; }
+.golden-kicker { color: rgba(255,235,164,.56); font: 800 8px/1 Arial,sans-serif; letter-spacing: .27em; text-transform: uppercase; }
+.golden-title {
+  margin-top: 5px;
+  color: #fff7d5;
+  font: 900 clamp(29px,3vw,42px)/.86 Impact,'Arial Narrow',Arial,sans-serif;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  text-shadow: 0 0 22px rgba(240,180,41,.2);
+}
+.golden-title span { color: var(--gold); }
+.golden-sub { margin-top: 8px; color: rgba(255,255,255,.48); font: 700 8px/1 Arial,sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+
+@media (max-width: 760px), (max-height: 560px) {
+  .d-score-layout.golden-active { grid-template-columns: minmax(0,1fr) minmax(196px,1.05fr) minmax(0,1fr); gap: 5px; }
+  .golden-moment { grid-template-columns: 45px minmax(0,1fr); gap: 9px; min-height: 82px; padding: 9px 10px; border-radius: 11px; }
+  .golden-emblem { width: 42px; height: 42px; }
+  .golden-emblem span { font-size: 20px; }
+  .golden-kicker { font-size: 6px; }
+  .golden-title { margin-top: 4px; font-size: clamp(22px,6vw,30px); }
+  .golden-sub { margin-top: 5px; font-size: 6px; letter-spacing: .1em; }
+}
+
+@media (max-width: 400px) {
+  .d-score-layout.golden-active { grid-template-columns: minmax(0,1fr) 184px minmax(0,1fr); gap: 4px; }
+  .golden-moment { grid-template-columns: 38px minmax(0,1fr); gap: 7px; padding-inline: 8px; }
+  .golden-emblem { width: 36px; height: 36px; }
+  .golden-title { font-size: 21px; }
+}
+
 /* ── DISPLAY VERTICAL FIT + TWO-COLUMN FIXTURES ────────────────────────────── */
 .d-live-zone {
   min-height: 250px;
@@ -1539,7 +1634,14 @@ function renderDisplayLiveBoard(liveTeams){
     </div>`;
   } else if(L.deuce){
     if(L.goldenPoint){
-      centerHtml=`<div class="d-status-big golden">⚡ GOLDEN POINT</div>`;
+      centerHtml=`<div class="golden-moment" role="status" aria-label="Golden point. Next point wins the game.">
+        <div class="golden-emblem" aria-hidden="true"><span>⚡</span></div>
+        <div class="golden-copy">
+          <div class="golden-kicker">Sudden Death</div>
+          <div class="golden-title">Golden <span>Point</span></div>
+          <div class="golden-sub">Next point wins the game</div>
+        </div>
+      </div>`;
     } else if(L.adv!==null){
       const advTeam=L.adv===0?p1:p2;
       const oppTeam=L.adv===0?p2:p1;
@@ -1571,7 +1673,7 @@ function renderDisplayLiveBoard(liveTeams){
   <div class="d-live-label" style="${setDone?'color:#f0b429':''}">${setDone?'MATCH COMPLETE':'LIVE'}</div>
   <div class="d-live-context">${context}</div>
 </div>
-<div class="d-score-layout">
+<div class="d-score-layout ${L.goldenPoint?'golden-active':''}">
   <div class="d-team-block left">${p1.map(n=>`<div class="d-team-player">${n}</div>`).join('')}</div>
   <div class="d-score-center">
     ${centerHtml}
