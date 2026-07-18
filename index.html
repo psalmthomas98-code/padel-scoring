@@ -1475,7 +1475,10 @@ const S = {
   showPIN:false, pinError:'', showTourPicker:false,
   results:{}, live:null, liveHistory:[],
   ko:freshKO(), sponsors:[], names:defaultNames(), players:defaultPlayers(),
-  presentation:{mode:'standard',matchId:''}, matchOrder:{}, logoutSerial:0
+  presentation:{mode:'standard',matchId:''}, matchOrder:{}, logoutSerial:0,
+  koSnapshot:null,       // undo auto-fill QF
+  fullSnapshot:null,     // undo full reset
+  confirmReset:false,    // two-step reset confirm
 };
 const AUTH_KEY='padel_admin_v1';
 function checkPersistedAuth(serial){ if(localStorage.getItem(AUTH_KEY)===String(serial)) S.authed=true; }
@@ -1549,11 +1552,12 @@ function propagateKOWinners(){
   if(w('sf1'))S.ko.final.t1=w('sf1');if(w('sf2'))S.ko.final.t2=w('sf2');
 }
 function autoFillQF(){
+  S.koSnapshot=JSON.stringify(S.ko); // save for undo
   const seed=k=>{const st=getStandings(k);return[st[0].team,st[1].team];};
   const[a1,a2]=seed('A'),[b1,b2]=seed('B'),[c1,c2]=seed('C'),[d1,d2]=seed('D');
   S.ko.qf1={t1:a1,t2:d2};S.ko.qf2={t1:b1,t2:c2};
   S.ko.qf3={t1:c1,t2:b2};S.ko.qf4={t1:d1,t2:a2};
-  propagateKOWinners();scheduleSave();render();
+  propagateKOWinners();saveNowFull();render();
 }
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
@@ -1972,6 +1976,20 @@ function renderWinnersAdmin(){
       <div class="done-score">${d.res.s1}–${d.res.s2}</div>
       <button class="act-btn ${active===d.id?'btn-stop':'btn-winner'}" data-action="${active===d.id?'hideWinner':'showWinner'}" data-id="${d.id}">${active===d.id?'Hide Backdrop':'Show Backdrop'}</button>
     </div>`).join(''):`<div class="d-empty-state" style="min-height:220px"><div><div class="d-empty-icon">◇</div><div class="d-empty-title">No completed matches yet</div><div class="d-empty-copy">Save a match result and it will become available here.</div></div></div>`}
+  </div>
+  <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+    <div class="admin-standings-title" style="margin-bottom:4px;color:var(--loss)">Danger Zone</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Permanently clears all match results, live scores, and the knockout bracket.</div>
+    ${S.fullSnapshot
+      ? `<button class="act-btn btn-undo" data-action="undoReset" style="width:100%;margin-bottom:8px">↩ Undo Reset — tap to restore</button>`
+      : ''}
+    ${S.confirmReset
+      ? `<div style="display:flex;gap:8px">
+           <button class="act-btn btn-stop" data-action="doReset" style="flex:1;background:var(--loss);border-color:var(--loss)">⚠ Confirm Reset</button>
+           <button class="act-btn" data-action="cancelReset" style="flex:1">Cancel</button>
+         </div>`
+      : `<button class="act-btn btn-stop" data-action="resetTournament" style="width:100%;border-color:rgba(224,82,82,.5);color:var(--loss)">⚠ Reset Tournament</button>`
+    }
   </div>`;
 }
 
@@ -2005,7 +2023,10 @@ function renderKnockoutAdmin(){
       <div class="admin-standings-title" style="margin-bottom:4px">Knockout Stage · Sun 19 July</div>
       <div class="ko-seeding-note">Seeding: 1v8 · 2v7 · 3v6 · 4v5 (Group winners = Seeds 1–4)</div>
     </div>
-    <button class="act-btn btn-autofill" data-action="autoFillQF">⚡ Auto-fill QF from Standings</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="act-btn btn-autofill" data-action="autoFillQF">⚡ Auto-fill QF from Standings</button>
+      ${S.koSnapshot?`<button class="act-btn btn-undo" data-action="undoAutoFill">↩ Undo Auto-fill</button>`:''}
+    </div>
   </div>
   <div class="ko-section-head">Quarter Finals — 5:30 PM</div>
   <div class="admin-match-list">${['qf1','qf2','qf3','qf4'].map((id,i)=>renderKOAdminMatch(id,i+1)).join('')}</div>
@@ -2228,6 +2249,21 @@ function attachHandlers(){
       if(a==='hideWinner')    {S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
       if(a==='undoResult')    {delete S.results[el.dataset.id];if(S.presentation.matchId===el.dataset.id)S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
       if(a==='autoFillQF')    {autoFillQF();}
+      if(a==='undoAutoFill')  {if(S.koSnapshot){S.ko=JSON.parse(S.koSnapshot);S.koSnapshot=null;propagateKOWinners();saveNowFull();render();}}
+      if(a==='resetTournament'){S.confirmReset=true;renderOverlays();}
+      if(a==='cancelReset')   {S.confirmReset=false;renderOverlays();}
+      if(a==='doReset')       {
+        S.fullSnapshot=JSON.stringify({results:S.results,live:S.live,ko:S.ko,names:S.names,players:S.players,presentation:S.presentation,matchOrder:S.matchOrder});
+        S.results={};S.live=null;S.liveHistory=[];S.ko=freshKO();S.presentation={mode:'standard',matchId:''};S.matchOrder={};S.confirmReset=false;S.koSnapshot=null;
+        saveNowFull();render();
+      }
+      if(a==='undoReset')     {
+        if(S.fullSnapshot){
+          const snap=JSON.parse(S.fullSnapshot);
+          S.results=snap.results||{};S.live=snap.live||null;S.ko=snap.ko||freshKO();S.names=snap.names||defaultNames();S.players=snap.players||defaultPlayers();S.presentation=snap.presentation||{mode:'standard',matchId:''};S.matchOrder=snap.matchOrder||{};
+          S.fullSnapshot=null;saveNowFull();render();
+        }
+      }
       if(a==='koGoLive')      {S.live=freshLive(el.dataset.id);S.liveHistory=[];S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
       if(a==='koSave')        {S.results[el.dataset.id]={s1:S.live.games[0],s2:S.live.games[1]};S.live=null;S.liveHistory=[];propagateKOWinners();saveNowFull();render();}
       if(a==='koUndoResult')  {delete S.results[el.dataset.id];if(S.presentation.matchId===el.dataset.id)S.presentation={mode:'standard',matchId:''};propagateKOWinners();saveNowFull();render();}
