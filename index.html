@@ -656,6 +656,18 @@ input,
 label { touch-action: manipulation; }
 button,
 input { font: inherit; }
+/* Kill iOS tap highlight everywhere */
+* { -webkit-tap-highlight-color: transparent; }
+/* Prevent text selection on interactive elements */
+button, .atab, .dstab, .act-btn, .point-btn, .admin-hdr-btn, .order-btn, .fab-btn {
+  user-select: none; -webkit-user-select: none;
+}
+/* Snappy press feedback on all tappable controls */
+button:active, .atab:active, .dstab:active {
+  transform: scale(0.96);
+  transition: transform 0.06s;
+}
+.point-btn:active { transform: scale(0.93); transition: transform 0.06s; }
 /* safe-area handled per breakpoint */
 
 /* ── WINNERS PHOTO BACKDROP ───────────────────────────────────────────────── */
@@ -1994,12 +2006,16 @@ function render(){
   startRealtime();
 }
 function renderOverlays(){
+  const prev = document.getElementById('admin-panel');
+  const scrollTop = prev ? prev.scrollTop : 0;
   try {
     document.getElementById('overlays').innerHTML=renderAdminPanel()+renderPINModal()+renderFAB();
   } catch(e) {
     console.error('overlay error',e);
   }
   attachHandlers();
+  const next = document.getElementById('admin-panel');
+  if(next && scrollTop) next.scrollTop = scrollTop;
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
