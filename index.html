@@ -1886,7 +1886,7 @@ function renderAdminPanel(){
     </div>
   </div>
   <div class="admin-tabs">
-    ${Object.keys(GROUPS).map(k=>`<button class="atab ${isGroup&&k===S.adminGroup?'active':''}" data-action="setGroup" data-group="${k}">${GROUPS[k].label}</button>`).join('')}
+    ${Object.keys(GROUPS).map(k=>{const hasLive=S.live&&MATCHES.find(m=>m.id===S.live.matchId)?.group===k;return`<button class="atab ${isGroup&&k===S.adminGroup?'active':''}" data-action="setGroup" data-group="${k}">${GROUPS[k].label}${hasLive?'<span style="color:#f46b1a;font-size:8px;vertical-align:middle;margin-left:3px">●</span>':''}</button>`;}).join('')}
     <button class="atab ko-tab ${isKO?'active':''}" data-action="setKOTab">Knockout</button>
     <button class="atab ${isPL?'active':''}" data-action="setPLTab">Players</button>
     <button class="atab ${isWN?'active':''}" data-action="setWNTab">Winners</button>
@@ -1932,7 +1932,7 @@ function attachHandlers(){
       }
       if(a==='lockAdmin')  {clearLocalAuth();S.adminOpen=false;renderOverlays();}
       if(a==='logoutAll')  {S.logoutSerial=(S.logoutSerial||0)+1;clearLocalAuth();S.adminOpen=false;scheduleSave();render();}
-      if(a==='openAdmin')  {S.adminOpen=true;renderOverlays();}
+      if(a==='openAdmin')  {S.adminOpen=true;if(S.live){const lm=MATCHES.find(m=>m.id===S.live.matchId);if(lm){S.adminGroup=lm.group;S.adminTab='group';}}renderOverlays();}
       if(a==='closeAdmin') {S.adminOpen=false;renderOverlays();}
       if(a==='setGroup')   {S.adminGroup=el.dataset.group;S.adminTab='group';render();}
       if(a==='moveMatchUp'||a==='moveMatchDown'){
