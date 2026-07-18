@@ -1365,15 +1365,27 @@ let syncStatus = 'ok', saveTimer = null, es = null;
 function dbPath() { return `${FIREBASE_URL}/${currentTour}.json`; }
 function freshKO() { const ko={}; KO_BRACKET.forEach(m=>{ko[m.id]={t1:'',t2:''}}); return ko; }
 
+function fullPayload() {
+  return {results:S.results,live:S.live,ko:S.ko,sponsors:S.sponsors,names:S.names,players:S.players,presentation:S.presentation,displayTab:S.displayTab,matchOrder:S.matchOrder,logoutSerial:S.logoutSerial};
+}
 async function pushToServer() {
   syncStatus='saving'; updateSyncDots();
   try {
-    const res=await fetch(dbPath(),{method:'PUT',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({results:S.results,live:S.live,ko:S.ko,sponsors:S.sponsors,names:S.names,players:S.players,presentation:S.presentation,displayTab:S.displayTab,matchOrder:S.matchOrder,logoutSerial:S.logoutSerial})});
+    const res=await fetch(dbPath(),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(fullPayload())});
     if(!res.ok) throw new Error(res.status);
     syncStatus='ok';
   } catch { syncStatus='error'; }
   saveTimer=null;
+  updateSyncDots();
+}
+// Scoring-only save: PUT just the live subtree — much smaller payload, faster round-trip
+async function pushLive() {
+  syncStatus='saving'; updateSyncDots();
+  try {
+    const res=await fetch(`${FIREBASE_URL}/${currentTour}/live.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(S.live)});
+    if(!res.ok) throw new Error(res.status);
+    syncStatus='ok';
+  } catch { syncStatus='error'; }
   updateSyncDots();
 }
 async function pullFromServer() {
@@ -1381,15 +1393,24 @@ async function pullFromServer() {
   catch { return null; }
 }
 function scheduleSave() { clearTimeout(saveTimer); saveTimer=setTimeout(pushToServer,400); }
-function saveNow() { clearTimeout(saveTimer); saveTimer=null; pushToServer(); }
+function saveNow() { clearTimeout(saveTimer); saveTimer=null; pushLive(); }
 
 function startRealtime() {
   if (es) return;
   es=new EventSource(dbPath());
   es.addEventListener('put',e=>{
-    const {data}=JSON.parse(e.data); if(!data) return;
-    if(saveTimer) return; // this device is mid-save; skip to avoid overwriting local state
+    const msg=JSON.parse(e.data); if(!msg.data) return;
     if(S.live && S.adminOpen) return; // this device is actively scoring
+    // Partial update from pushLive(): only the live subtree changed
+    if(msg.path==='/live'){
+      S.live=msg.data ? Object.assign({setWinner:null,adv:null},msg.data) : null;
+      syncStatus='ok'; updateSyncDots();
+      try { document.getElementById('root').innerHTML=renderDisplay(); renderOverlays(); } catch(err){ console.error('SSE render error:',err); }
+      return;
+    }
+    // Full update
+    if(saveTimer) return; // this device is mid-save; skip to avoid overwriting local state
+    const data=msg.data;
     S.results=data.results||{};
     // Firebase drops null fields (adv, setWinner) — restore them so renderDisplay works correctly
     S.live=data.live ? Object.assign({setWinner:null,adv:null},data.live) : null;
