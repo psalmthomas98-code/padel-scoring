@@ -283,21 +283,75 @@ body {
 .d-rs { font-family: Impact,'Arial Narrow',sans-serif; font-size: 11px; font-variant-numeric: tabular-nums; flex-shrink: 0; color: white; }
 
 /* ── KO display ── */
-.d-ko-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
-.d-ko-col { display: flex; flex-direction: column; }
-.d-ko-round-head { font-family: Impact,'Arial Narrow',sans-serif; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--fire); padding: 5px 10px; background: rgba(244,107,26,.1); border: 1px solid rgba(244,107,26,.2); border-bottom: none; text-align: center; }
-.d-ko-body { flex: 1; display: flex; flex-direction: column; gap: 5px; padding: 6px; background: rgba(10,6,3,.75); border: 1px solid rgba(255,255,255,.07); backdrop-filter: blur(6px); }
-.d-ko-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); padding: 6px 8px; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 3px; }
-.d-ko-card.is-live { border-color: var(--fire); background: rgba(244,107,26,.08); }
-.d-ko-card.is-done { border-left: 3px solid var(--win); }
-.d-ko-label { font-size: 7px; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: 2px; }
-.d-ko-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-.d-ko-name { font-size: clamp(8px,0.9vw,12px); font-weight: 700; color: white; flex: 1; line-height: 1.2; }
-.d-ko-name.winner { color: var(--gold); }
-.d-ko-name.tbd { color: rgba(255,255,255,.3); font-style: italic; font-weight: 400; }
-.d-ko-score { font-family: Impact,'Arial Narrow',sans-serif; font-size: clamp(12px,1.8vw,20px); color: var(--fire); font-variant-numeric: tabular-nums; }
-.d-ko-score.winner { color: var(--gold); }
-.d-ko-div { height: 1px; background: rgba(255,255,255,.08); margin: 1px 0; }
+.d-ko-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1.16fr) 42px minmax(0,1fr) 42px minmax(0,.9fr);
+  min-height: clamp(360px,42vh,500px);
+  padding: 10px;
+  border: 1px solid rgba(244,107,26,.18);
+  background: linear-gradient(180deg,rgba(19,11,7,.82),rgba(7,5,4,.9));
+  box-shadow: 0 20px 70px rgba(0,0,0,.32);
+  backdrop-filter: blur(9px);
+  overflow: hidden;
+}
+.d-ko-col { display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+.d-ko-round-head {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 48px; padding: 8px 10px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.09);
+}
+.d-ko-round-no {
+  display: grid; place-items: center; width: 29px; height: 29px; flex: 0 0 auto;
+  border: 1px solid rgba(244,107,26,.42); color: var(--fire);
+  font: 800 9px/1 Arial,sans-serif; letter-spacing: .08em;
+  transform: rotate(45deg);
+}
+.d-ko-round-no span { transform: rotate(-45deg); }
+.d-ko-round-title { color: #fff; font: 900 clamp(11px,1vw,14px)/1 Impact,'Arial Narrow',sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.d-ko-round-meta { margin-top: 4px; color: rgba(255,255,255,.32); font: 700 7px/1 Arial,sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+.d-ko-col.is-final .d-ko-round-no { border-color: rgba(240,180,41,.55); color: var(--gold); box-shadow: 0 0 22px rgba(240,180,41,.12); }
+.d-ko-col.is-final .d-ko-round-title { color: var(--gold); }
+.d-ko-body { display: grid; align-items: stretch; gap: 8px; min-height: 0; padding: 9px 3px; }
+.d-ko-col.is-qf .d-ko-body { grid-template-rows: repeat(4,minmax(0,1fr)); }
+.d-ko-col.is-sf .d-ko-body { grid-template-rows: repeat(2,minmax(96px,auto)); align-content: space-around; }
+.d-ko-col.is-final .d-ko-body { display: flex; align-items: center; }
+.d-ko-card {
+  position: relative; display: grid; grid-template-rows: auto 1fr;
+  min-width: 0; min-height: 0; padding: 7px 9px 6px;
+  border: 1px solid rgba(255,255,255,.1); border-radius: 3px;
+  background: linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+  box-shadow: inset 0 1px rgba(255,255,255,.025),0 8px 18px rgba(0,0,0,.12);
+}
+.d-ko-card::before { content:''; position:absolute; inset:7px auto 7px -1px; width:2px; background:rgba(255,255,255,.13); }
+.d-ko-card.is-ready::before { background:var(--fire); }
+.d-ko-card.is-live { border-color: rgba(244,107,26,.75); background: linear-gradient(135deg,rgba(244,107,26,.17),rgba(244,107,26,.045)); box-shadow: 0 0 28px rgba(244,107,26,.11),inset 0 1px rgba(255,255,255,.04); }
+.d-ko-card.is-live::before { width:3px; background:var(--fire); box-shadow:0 0 12px var(--fire); }
+.d-ko-card.is-done::before { background:var(--win); }
+.d-ko-card-top { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:3px; }
+.d-ko-label { color: rgba(255,255,255,.36); font: 800 7px/1 Arial,sans-serif; letter-spacing: .19em; text-transform: uppercase; }
+.d-ko-state { display:inline-flex; align-items:center; gap:5px; color:rgba(255,255,255,.3); font:800 6px/1 Arial,sans-serif; letter-spacing:.15em; text-transform:uppercase; white-space:nowrap; }
+.d-ko-state-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.d-ko-card.is-live .d-ko-state { color:var(--fire); }
+.d-ko-card.is-live .d-ko-state-dot { box-shadow:0 0 8px currentColor; animation:livePulse 1.6s ease-in-out infinite; }
+.d-ko-card.is-done .d-ko-state { color:var(--win); }
+.d-ko-matchup { display:grid; align-content:center; min-height:0; }
+.d-ko-row { display:grid; grid-template-columns: 10px minmax(0,1fr) auto; align-items:center; gap:6px; min-height:25px; }
+.d-ko-marker { color:rgba(255,255,255,.14); font-size:7px; text-align:center; }
+.d-ko-row.is-winner .d-ko-marker { color:var(--gold); }
+.d-ko-name { min-width:0; overflow:hidden; color:rgba(255,255,255,.9); font-size:clamp(8px,.82vw,12px); font-weight:750; line-height:1.16; text-overflow:ellipsis; white-space:nowrap; }
+.d-ko-row.is-winner .d-ko-name { color:var(--gold); }
+.d-ko-name.tbd { color:rgba(255,255,255,.24); font-style:italic; font-weight:500; }
+.d-ko-score { min-width:18px; color:rgba(255,255,255,.75); font:400 clamp(13px,1.35vw,20px)/1 Impact,'Arial Narrow',sans-serif; text-align:right; font-variant-numeric:tabular-nums; }
+.d-ko-row.is-winner .d-ko-score { color:var(--gold); }
+.d-ko-card.is-live .d-ko-score { color:var(--fire); }
+.d-ko-div { height:1px; margin-left:16px; background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(255,255,255,.025)); }
+.d-ko-flow { position:relative; min-width:0; }
+.d-ko-flow::before { content:''; position:absolute; left:7px; right:7px; top:50%; height:1px; background:linear-gradient(90deg,rgba(244,107,26,.18),rgba(244,107,26,.64),rgba(244,107,26,.18)); }
+.d-ko-flow::after { content:'›'; position:absolute; top:50%; left:50%; display:grid; place-items:center; width:22px; height:22px; border:1px solid rgba(244,107,26,.42); border-radius:50%; background:#160d08; color:var(--fire); font:18px/1 Arial,sans-serif; transform:translate(-50%,-50%); box-shadow:0 0 18px rgba(244,107,26,.12); }
+.d-ko-final-card { width:100%; min-height:178px; padding:12px; border-color:rgba(240,180,41,.3); background:radial-gradient(circle at 50% 0,rgba(240,180,41,.16),transparent 48%),linear-gradient(145deg,rgba(244,107,26,.08),rgba(255,255,255,.025)); }
+.d-ko-final-card::before { inset:10px auto; background:linear-gradient(var(--gold),var(--fire)); }
+.d-ko-crown { display:grid; place-items:center; width:36px; height:36px; margin:1px auto 7px; border:1px solid rgba(240,180,41,.38); border-radius:50%; color:var(--gold); font-size:15px; box-shadow:0 0 24px rgba(240,180,41,.1); }
+.d-ko-final-kicker { margin-bottom:7px; color:rgba(240,180,41,.56); font:800 7px/1 Arial,sans-serif; letter-spacing:.22em; text-align:center; text-transform:uppercase; }
 
 /* ── Sponsors strip ── */
 .d-sponsors {
@@ -621,8 +675,13 @@ body {
   .d-live-footer { font-size: 8px; letter-spacing: 1.2px; }
   .d-standings-zone { padding: 0 14px 10px; }
   .d-standings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .d-ko-grid { grid-template-columns: 1fr; }
-  .d-ko-body { min-height: 120px; }
+  .d-ko-grid { grid-template-columns: 1fr; min-height:0; padding:8px; gap:12px; overflow:visible; }
+  .d-ko-flow { display:none; }
+  .d-ko-col.is-qf .d-ko-body { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:none; }
+  .d-ko-col.is-sf .d-ko-body { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:none; }
+  .d-ko-col.is-final .d-ko-body { display:block; }
+  .d-ko-card { min-height:88px; }
+  .d-ko-final-card { min-height:178px; }
   .d-sponsors { padding-inline: 12px; gap: 12px; }
 }
 
@@ -635,6 +694,8 @@ body {
   .d-point-num { font-size: 40px; }
   .d-point-dash { font-size: 28px; }
   .d-standings-grid { grid-template-columns: 1fr; }
+  .d-ko-col.is-qf .d-ko-body,
+  .d-ko-col.is-sf .d-ko-body { grid-template-columns:1fr; }
 }
 
 /* ── PHONE + LAPTOP COMPATIBILITY ─────────────────────────────────────────── */
@@ -812,8 +873,12 @@ button:active, .atab:active, .dstab:active {
   .d-banner-right { margin-left: auto; }
   .d-live-zone { padding-block: 18px; }
   .d-standings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .d-ko-grid { grid-template-columns: 1fr; }
-  .d-ko-body { min-height: 140px; }
+  .d-ko-grid { grid-template-columns:1fr; min-height:0; gap:12px; overflow:visible; }
+  .d-ko-flow { display:none; }
+  .d-ko-col.is-qf .d-ko-body { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:none; }
+  .d-ko-col.is-sf .d-ko-body { grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-rows:none; }
+  .d-ko-col.is-final .d-ko-body { display:block; }
+  .d-ko-card { min-height:90px; }
 }
 
 @media (max-width: 820px), (max-height: 560px) {
@@ -1881,34 +1946,44 @@ function renderKODisplay(){
     const meta=getKOMeta(id),{t1,t2}=getKOTeams(id),res=S.results[id];
     const isLive=S.live&&S.live.matchId===id,isDone=!!res;
     const winner=isDone?(res.s1>res.s2?t1:t2):null;
-    return`<div class="d-ko-card ${isLive?'is-live':''} ${isDone?'is-done':''}">
-      <div class="d-ko-label">${meta.label}</div>
-      <div class="d-ko-row">
-        <div class="d-ko-name ${isDone?(winner===t1?'winner':''):(t1?'':'tbd')}">${t1||'TBD'}</div>
-        ${isDone?`<div class="d-ko-score ${winner===t1?'winner':''}">${res.s1}</div>`:''}
-        ${isLive?`<div class="d-ko-score">${S.live.games[0]}</div>`:''}
-      </div>
+    const isReady=!isLive&&!isDone&&!!t1&&!!t2;
+    const state=isLive?'Live':isDone?'Complete':isReady?'Ready':'Awaiting teams';
+    const score1=isLive?S.live.games[0]:isDone?res.s1:'—';
+    const score2=isLive?S.live.games[1]:isDone?res.s2:'—';
+    const finalClass=id==='final'?' d-ko-final-card':'';
+    return`<article class="d-ko-card${finalClass} ${isLive?'is-live':isDone?'is-done':isReady?'is-ready':'is-waiting'}">
+      <div class="d-ko-card-top"><div class="d-ko-label">${meta.label}</div><div class="d-ko-state"><i class="d-ko-state-dot"></i>${state}</div></div>
+      <div class="d-ko-matchup">
+        ${id==='final'?'<div class="d-ko-crown">★</div><div class="d-ko-final-kicker">Championship match</div>':''}
+        <div class="d-ko-row ${winner===t1?'is-winner':''}">
+          <div class="d-ko-marker">${winner===t1?'◆':'•'}</div>
+          <div class="d-ko-name ${t1?'':'tbd'}">${t1||'Awaiting qualifier'}</div>
+          <div class="d-ko-score">${score1}</div>
+        </div>
       <div class="d-ko-div"></div>
-      <div class="d-ko-row">
-        <div class="d-ko-name ${isDone?(winner===t2?'winner':''):(t2?'':'tbd')}">${t2||'TBD'}</div>
-        ${isDone?`<div class="d-ko-score ${winner===t2?'winner':''}">${res.s2}</div>`:''}
-        ${isLive?`<div class="d-ko-score">${S.live.games[1]}</div>`:''}
+        <div class="d-ko-row ${winner===t2?'is-winner':''}">
+          <div class="d-ko-marker">${winner===t2?'◆':'•'}</div>
+          <div class="d-ko-name ${t2?'':'tbd'}">${t2||'Awaiting qualifier'}</div>
+          <div class="d-ko-score">${score2}</div>
+        </div>
       </div>
-    </div>`;
+    </article>`;
   };
   return`<div class="d-ko-grid">
-  <div class="d-ko-col">
-    <div class="d-ko-round-head">Quarter Finals</div>
+  <section class="d-ko-col is-qf">
+    <header class="d-ko-round-head"><div class="d-ko-round-no"><span>01</span></div><div><div class="d-ko-round-title">Quarter Finals</div><div class="d-ko-round-meta">Top 8 · 4 matches</div></div></header>
     <div class="d-ko-body">${['qf1','qf2','qf3','qf4'].map(renderCard).join('')}</div>
-  </div>
-  <div class="d-ko-col">
-    <div class="d-ko-round-head">Semi Finals</div>
-    <div class="d-ko-body" style="justify-content:space-around">${['sf1','sf2'].map(renderCard).join('')}</div>
-  </div>
-  <div class="d-ko-col">
-    <div class="d-ko-round-head" style="color:var(--gold)">Final</div>
-    <div class="d-ko-body" style="justify-content:center">${renderCard('final')}</div>
-  </div>
+  </section>
+  <div class="d-ko-flow" aria-hidden="true"></div>
+  <section class="d-ko-col is-sf">
+    <header class="d-ko-round-head"><div class="d-ko-round-no"><span>02</span></div><div><div class="d-ko-round-title">Semi Finals</div><div class="d-ko-round-meta">Final 4 · 2 matches</div></div></header>
+    <div class="d-ko-body">${['sf1','sf2'].map(renderCard).join('')}</div>
+  </section>
+  <div class="d-ko-flow" aria-hidden="true"></div>
+  <section class="d-ko-col is-final">
+    <header class="d-ko-round-head"><div class="d-ko-round-no"><span>03</span></div><div><div class="d-ko-round-title">The Final</div><div class="d-ko-round-meta">Championship match</div></div></header>
+    <div class="d-ko-body">${renderCard('final')}</div>
+  </section>
 </div>`;
 }
 
