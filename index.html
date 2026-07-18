@@ -1379,21 +1379,27 @@ async function pushToServer() {
   updateSyncDots();
 }
 // Scoring-only save: PUT just the live subtree — much smaller payload, faster round-trip
+// Uses a pending flag so rapid taps never fire concurrent fetches (avoids out-of-order overwrites)
+let _liveSaving=false, _livePending=false;
 async function pushLive() {
+  if(_liveSaving){_livePending=true;return;}
+  _liveSaving=true; _livePending=false;
   syncStatus='saving'; updateSyncDots();
   try {
     const res=await fetch(`${FIREBASE_URL}/${currentTour}/live.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(S.live)});
     if(!res.ok) throw new Error(res.status);
     syncStatus='ok';
   } catch { syncStatus='error'; }
-  updateSyncDots();
+  _liveSaving=false; updateSyncDots();
+  if(_livePending) pushLive(); // flush latest state if more taps happened during fetch
 }
 async function pullFromServer() {
   try { const r=await fetch(dbPath()); if(!r.ok) return null; return await r.json(); }
   catch { return null; }
 }
 function scheduleSave() { clearTimeout(saveTimer); saveTimer=setTimeout(pushToServer,400); }
-function saveNow() { clearTimeout(saveTimer); saveTimer=null; pushLive(); }
+function saveNow() { clearTimeout(saveTimer); saveTimer=null; pushLive(); }       // scoring only
+function saveNowFull() { clearTimeout(saveTimer); saveTimer=null; pushToServer(); } // full state
 
 function startRealtime() {
   if (es) return;
@@ -2207,24 +2213,24 @@ function attachHandlers(){
       if(a==='openPicker') {S.showTourPicker=true;render();}
       if(a==='closePicker'){S.showTourPicker=false;render();}
       if(a==='pickTour')   {S.showTourPicker=false;await switchTournament(el.dataset.id);}
-      if(a==='goLive')   {S.live=freshLive(el.dataset.id);S.liveHistory=[];S.presentation={mode:'standard',matchId:''};scheduleSave();render();}
-      if(a==='stopLive') {S.live=null;S.liveHistory=[];scheduleSave();render();}
+      if(a==='goLive')   {S.live=freshLive(el.dataset.id);S.liveHistory=[];S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
+      if(a==='stopLive') {S.live=null;S.liveHistory=[];saveNowFull();render();}
       if(a==='pt')       {awardPoint(+el.dataset.team);}
       if(a==='undo')     {undoPoint();}
-      if(a==='save')     {S.results[el.dataset.id]={s1:S.live.games[0],s2:S.live.games[1]};S.live=null;S.liveHistory=[];scheduleSave();render();}
+      if(a==='save')     {S.results[el.dataset.id]={s1:S.live.games[0],s2:S.live.games[1]};S.live=null;S.liveHistory=[];saveNowFull();render();}
       if(a==='dispSave') {
         S.results[el.dataset.id]={s1:S.live.games[0],s2:S.live.games[1]};
         S.live=null;S.liveHistory=[];
         if(getKOMeta(el.dataset.id))propagateKOWinners();
         scheduleSave();render();
       }
-      if(a==='showWinner')    {S.presentation={mode:'winner',matchId:el.dataset.id};scheduleSave();render();}
-      if(a==='hideWinner')    {S.presentation={mode:'standard',matchId:''};scheduleSave();render();}
-      if(a==='undoResult')    {delete S.results[el.dataset.id];if(S.presentation.matchId===el.dataset.id)S.presentation={mode:'standard',matchId:''};scheduleSave();render();}
+      if(a==='showWinner')    {S.presentation={mode:'winner',matchId:el.dataset.id};saveNowFull();render();}
+      if(a==='hideWinner')    {S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
+      if(a==='undoResult')    {delete S.results[el.dataset.id];if(S.presentation.matchId===el.dataset.id)S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
       if(a==='autoFillQF')    {autoFillQF();}
-      if(a==='koGoLive')      {S.live=freshLive(el.dataset.id);S.liveHistory=[];S.presentation={mode:'standard',matchId:''};scheduleSave();render();}
-      if(a==='koSave')        {S.results[el.dataset.id]={s1:S.live.games[0],s2:S.live.games[1]};S.live=null;S.liveHistory=[];propagateKOWinners();scheduleSave();render();}
-      if(a==='koUndoResult')  {delete S.results[el.dataset.id];if(S.presentation.matchId===el.dataset.id)S.presentation={mode:'standard',matchId:''};propagateKOWinners();scheduleSave();render();}
+      if(a==='koGoLive')      {S.live=freshLive(el.dataset.id);S.liveHistory=[];S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
+      if(a==='koSave')        {S.results[el.dataset.id]={s1:S.live.games[0],s2:S.live.games[1]};S.live=null;S.liveHistory=[];propagateKOWinners();saveNowFull();render();}
+      if(a==='koUndoResult')  {delete S.results[el.dataset.id];if(S.presentation.matchId===el.dataset.id)S.presentation={mode:'standard',matchId:''};propagateKOWinners();saveNowFull();render();}
     });
   });
 }
