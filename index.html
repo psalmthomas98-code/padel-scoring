@@ -1033,6 +1033,117 @@ button:active, .atab:active, .dstab:active {
   .d-clock { font-size: 23px; }
 }
 
+/* ── SET WON VICTORY MOMENT ───────────────────────────────────────────────── */
+.d-score-layout.set-won-active {
+  grid-template-columns: minmax(0,1fr) minmax(330px,.95fr) minmax(0,1fr);
+}
+.set-won-moment {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 70px minmax(0,1fr);
+  align-items: center;
+  gap: 16px;
+  width: min(450px,100%);
+  min-height: 116px;
+  padding: 14px 20px 14px 15px;
+  overflow: hidden;
+  border: 1px solid rgba(240,180,41,.72);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 16% 50%, rgba(240,180,41,.20), transparent 32%),
+    linear-gradient(135deg, rgba(37,31,15,.97), rgba(11,16,16,.98) 55%, rgba(22,27,17,.97));
+  box-shadow: 0 14px 38px rgba(0,0,0,.4), 0 0 35px rgba(240,180,41,.12), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.set-won-moment::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: .36;
+  background:
+    linear-gradient(118deg, transparent 0 44%, rgba(240,180,41,.08) 44.2% 44.8%, transparent 45%),
+    repeating-linear-gradient(118deg, transparent 0 52px, rgba(255,255,255,.045) 53px 54px);
+}
+.set-won-moment::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  left: 16%;
+  right: 6%;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), #fff0a8, var(--gold), transparent);
+  box-shadow: 0 0 13px rgba(240,180,41,.6);
+}
+.set-won-emblem {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  border: 1px solid rgba(240,180,41,.56);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,180,41,.23), rgba(240,180,41,.05) 58%, transparent 60%);
+  box-shadow: 0 0 0 7px rgba(240,180,41,.045), 0 0 26px rgba(240,180,41,.16);
+}
+.set-won-emblem::before,
+.set-won-emblem::after {
+  content: '';
+  position: absolute;
+  width: 21px;
+  height: 38px;
+  bottom: 11px;
+  border-bottom: 2px solid rgba(240,180,41,.28);
+}
+.set-won-emblem::before { left: -15px; border-left: 2px solid rgba(240,180,41,.28); border-radius: 0 0 0 22px; transform: rotate(18deg); }
+.set-won-emblem::after { right: -15px; border-right: 2px solid rgba(240,180,41,.28); border-radius: 0 0 22px 0; transform: rotate(-18deg); }
+.set-won-emblem span { color: #ffe17a; font: 900 29px/1 Arial,sans-serif; text-shadow: 0 0 12px rgba(240,180,41,.7); }
+.set-won-copy { min-width: 0; text-align: left; }
+.set-won-kicker { color: rgba(255,235,164,.56); font: 800 8px/1 Arial,sans-serif; letter-spacing: .27em; text-transform: uppercase; }
+.set-won-title {
+  margin-top: 5px;
+  color: var(--gold);
+  font: 900 clamp(31px,3.1vw,44px)/.86 Impact,'Arial Narrow',Arial,sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-shadow: 0 0 22px rgba(240,180,41,.2);
+}
+.set-won-names {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  margin-top: 9px;
+  color: #fff;
+  font: 800 clamp(12px,1.25vw,17px)/1 Arial,sans-serif;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+.set-won-names span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.set-won-names b { color: var(--gold); font: 400 italic 15px/1 Georgia,serif; }
+
+@media (max-width: 760px), (max-height: 560px) {
+  .d-score-layout.set-won-active { grid-template-columns: minmax(0,1fr) minmax(202px,1.08fr) minmax(0,1fr); gap: 5px; }
+  .d-score-layout.set-won-active .d-team-player { font-size: 10px; overflow-wrap: normal; white-space: nowrap; }
+  .set-won-moment { grid-template-columns: 46px minmax(0,1fr); gap: 9px; min-height: 86px; padding: 9px 10px; border-radius: 11px; }
+  .set-won-emblem { width: 43px; height: 43px; }
+  .set-won-emblem::before,.set-won-emblem::after { display:none; }
+  .set-won-emblem span { font-size: 21px; }
+  .set-won-kicker { font-size: 6px; }
+  .set-won-title { margin-top: 4px; font-size: clamp(23px,6vw,31px); }
+  .set-won-names { gap: 4px; margin-top: 6px; font-size: clamp(8px,2.5vw,11px); }
+  .set-won-names b { font-size: 10px; }
+}
+
+@media (max-width: 400px) {
+  .d-score-layout.set-won-active { grid-template-columns: minmax(0,1fr) 190px minmax(0,1fr); gap: 4px; }
+  .d-score-layout.set-won-active .d-team-player { font-size: 9px; }
+  .set-won-moment { grid-template-columns: 39px minmax(0,1fr); gap: 7px; padding-inline: 8px; }
+  .set-won-emblem { width: 37px; height: 37px; }
+  .set-won-title { font-size: 22px; }
+}
+
 /* ── GOLDEN POINT MOMENT ──────────────────────────────────────────────────── */
 .d-score-layout.golden-active {
   grid-template-columns: minmax(0,1fr) minmax(300px,.9fr) minmax(0,1fr);
@@ -1623,8 +1734,15 @@ function renderDisplayLiveBoard(liveTeams){
   const setDone=L.setWinner!==null;
   let centerHtml='';
   if(setDone){
-    const wname=(L.setWinner===0?t1:t2).split(' & ')[0];
-    centerHtml=`<div class="d-status-big done">SET WON · ${wname}</div>`;
+    const winnerNames=L.setWinner===0?p1:p2;
+    centerHtml=`<div class="set-won-moment" role="status" aria-label="Set won by ${winnerNames.join(' and ')}.">
+      <div class="set-won-emblem" aria-hidden="true"><span>✓</span></div>
+      <div class="set-won-copy">
+        <div class="set-won-kicker">Match Complete</div>
+        <div class="set-won-title">Set Won</div>
+        <div class="set-won-names">${winnerNames.map(n=>`<span>${n}</span>`).join('<b>&amp;</b>')}</div>
+      </div>
+    </div>`;
   } else if(L.tiebreak){
     centerHtml=`<div class="d-point-label">TIEBREAK</div>
     <div class="d-point-row">
@@ -1673,7 +1791,7 @@ function renderDisplayLiveBoard(liveTeams){
   <div class="d-live-label" style="${setDone?'color:#f0b429':''}">${setDone?'MATCH COMPLETE':'LIVE'}</div>
   <div class="d-live-context">${context}</div>
 </div>
-<div class="d-score-layout ${L.goldenPoint?'golden-active':''}">
+<div class="d-score-layout ${L.goldenPoint?'golden-active':''} ${setDone?'set-won-active':''}">
   <div class="d-team-block left">${p1.map(n=>`<div class="d-team-player">${n}</div>`).join('')}</div>
   <div class="d-score-center">
     ${centerHtml}
