@@ -454,6 +454,13 @@ body {
 .point-btn.t2 { background: #1a65a3; color: white; }
 .ctrl-sep { font-size: 18px; color: var(--dim); text-align: center; }
 .done-score { font-family: Impact,'Arial Narrow',sans-serif; font-size: 28px; color: var(--chalk); text-align: center; padding: 10px; background: var(--raised); border-radius: 8px; font-variant-numeric: tabular-nums; letter-spacing: 2px; }
+.ko-manual-form { background: var(--raised); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.ko-manual-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-align: center; }
+.ko-manual-row { display: grid; grid-template-columns: 1fr auto auto auto 1fr; align-items: center; gap: 6px; }
+.ko-manual-team { font-size: 11px; font-weight: 700; color: var(--chalk); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ko-manual-input { width: 48px; text-align: center; font-size: 22px; font-weight: 800; font-family: Impact,'Arial Narrow',sans-serif; background: var(--card); border: 1px solid rgba(255,255,255,.18); border-radius: 6px; color: var(--chalk); padding: 6px 4px; -moz-appearance: textfield; }
+.ko-manual-input::-webkit-inner-spin-button, .ko-manual-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.ko-manual-dash { font-size: 20px; font-weight: 700; color: var(--muted); text-align: center; }
 .match-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 .act-btn { padding: 10px 6px; border: none; cursor: pointer; font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; transition: filter .12s; border-radius: 6px; min-height: 44px; line-height: 1.2; white-space: normal; }
 .act-btn:active { filter: brightness(.85); }
@@ -1624,6 +1631,7 @@ const S = {
   fullSnapshot:null,     // undo full reset
   confirmReset:false,    // two-step reset confirm
   playersDirty:false,    // unsaved player name edits in progress
+  koManualEntry:null,    // which KO match id has manual score form open
 };
 const AUTH_KEY='padel_admin_v1';
 function checkPersistedAuth(serial){ if(localStorage.getItem(AUTH_KEY)===String(serial)) S.authed=true; }
@@ -2318,14 +2326,37 @@ function renderKOAdminMatch(id,idx){
         <button class="act-btn btn-stop" data-action="stopLive">Stop</button>
       </div>
     </div>`;
+  } else if(S.koManualEntry===id){
+    const bo2=isBestOf2(id);
+    const maxVal=bo2?2:7;
+    const label=bo2?'Sets':'Games';
+    const cur=res||{s1:'',s2:''};
+    body=`<div class="ko-manual-form">
+      <div class="ko-manual-label">${label} won</div>
+      <div class="ko-manual-row">
+        <div class="ko-manual-team">${t1||'Team 1'}</div>
+        <input class="ko-manual-input" type="number" min="0" max="${maxVal}" value="${cur.s1}" id="km-s1-${id}" inputmode="numeric">
+        <span class="ko-manual-dash">–</span>
+        <input class="ko-manual-input" type="number" min="0" max="${maxVal}" value="${cur.s2}" id="km-s2-${id}" inputmode="numeric">
+        <div class="ko-manual-team" style="text-align:right">${t2||'Team 2'}</div>
+      </div>
+      <div class="match-actions" style="grid-template-columns:1fr 1fr;margin-top:10px">
+        <button class="act-btn btn-save" data-action="koManualSave" data-id="${id}" data-bo2="${bo2?1:0}">✓ Save Score</button>
+        <button class="act-btn" style="background:rgba(255,255,255,.07)" data-action="koManualCancel">Cancel</button>
+      </div>
+    </div>`;
   } else if(isDone){
     body=`<div class="done-score">${res.s1} – ${res.s2}</div>
-    <div class="match-actions" style="grid-template-columns:1fr 1fr;margin-top:8px">
+    <div class="match-actions" style="grid-template-columns:1fr 1fr 1fr;margin-top:8px">
       <button class="act-btn btn-winner" data-action="showWinner" data-id="${id}">★ Winners</button>
+      <button class="act-btn" style="background:rgba(255,255,255,.07)" data-action="koOpenManual" data-id="${id}">✎ Edit</button>
       <button class="act-btn btn-result" data-action="koUndoResult" data-id="${id}">↩ Undo</button>
     </div>`;
   } else {
-    body=`<button class="act-btn btn-golive" style="width:100%" data-action="koGoLive" data-id="${id}" ${!canGoLive?'disabled':''}>▶ Start Match</button>`;
+    body=`<div class="match-actions" style="grid-template-columns:1fr 1fr">
+      <button class="act-btn btn-golive" data-action="koGoLive" data-id="${id}" ${!canGoLive?'disabled':''}>▶ Start Match</button>
+      <button class="act-btn" style="background:rgba(255,255,255,.07)" data-action="koOpenManual" data-id="${id}" ${!canGoLive?'disabled':''}>✎ Enter Score</button>
+    </div>`;
   }
   return`<div class="admin-match ${isLive?'is-live':''} ${isDone?'is-done':''}">
   <div class="match-header">
@@ -2533,6 +2564,16 @@ function attachHandlers(){
       if(a==='koGoLive')      {S.live=freshLive(el.dataset.id);S.liveHistory=[];S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
       if(a==='koSave')        {const _id=el.dataset.id;S.results[_id]=isBestOf2(_id)?{s1:S.live.sets[0],s2:S.live.sets[1]}:{s1:S.live.games[0],s2:S.live.games[1]};S.live=null;S.liveHistory=[];propagateKOWinners();saveNowFull();render();}
       if(a==='koUndoResult')  {delete S.results[el.dataset.id];if(S.presentation.matchId===el.dataset.id)S.presentation={mode:'standard',matchId:''};propagateKOWinners();saveNowFull();render();}
+      if(a==='koOpenManual')  {S.koManualEntry=el.dataset.id;render();}
+      if(a==='koManualCancel'){S.koManualEntry=null;render();}
+      if(a==='koManualSave')  {
+        const _id=el.dataset.id;
+        const v1=parseInt(document.getElementById('km-s1-'+_id)?.value,10);
+        const v2=parseInt(document.getElementById('km-s2-'+_id)?.value,10);
+        const max=el.dataset.bo2==='1'?2:7;
+        if(isNaN(v1)||isNaN(v2)||v1<0||v2<0||v1>max||v2>max||v1===v2){alert('Invalid score. Check the values and try again.');return;}
+        S.results[_id]={s1:v1,s2:v2};S.koManualEntry=null;propagateKOWinners();saveNowFull();render();
+      }
     });
   });
 }
