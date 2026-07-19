@@ -1563,7 +1563,7 @@ function startRealtime() {
     S.results=data.results||{};
     // Firebase drops null fields (adv, setWinner) — restore them so renderDisplay works correctly
     S.live=data.live ? Object.assign({setWinner:null,adv:null,sets:[0,0],superTB:false,superTBPoints:[0,0]},data.live) : null;
-    S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames();
+    S.ko=data.ko||freshKO(); propagateKOWinners(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames();
     if(!S.playersDirty) S.players=data.players||defaultPlayers(); // don't overwrite unsaved edits
     S.presentation=data.presentation||{mode:'standard',matchId:''};
     if(!S.adminOpen) S.displayTab=data.displayTab||'groups';
@@ -2570,7 +2570,7 @@ function renderOverlays(){
   if(data){
     S.results=data.results||{};
     S.live=data.live ? Object.assign({setWinner:null,adv:null,sets:[0,0],superTB:false,superTBPoints:[0,0]},data.live) : null;
-    S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames();
+    S.ko=data.ko||freshKO(); propagateKOWinners(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames();
     S.players=data.players||defaultPlayers(); S.presentation=data.presentation||{mode:'standard',matchId:''};
     S.displayTab=data.displayTab||'groups'; S.matchOrder=data.matchOrder||{};
     S.logoutSerial=data.logoutSerial||0; checkPersistedAuth(S.logoutSerial);
