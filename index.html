@@ -1706,12 +1706,10 @@ function getKOMeta(id){return KO_BRACKET.find(m=>m.id===id);}
 function koWinner(id){const r=S.results[id];if(!r)return null;const{t1,t2}=getKOTeams(id);return r.s1>r.s2?t1:t2;}
 function propagateKOWinners(){
   const w=id=>koWinner(id);
-  if(!S.ko.sf1)S.ko.sf1={t1:'',t2:''};
-  if(!S.ko.sf2)S.ko.sf2={t1:'',t2:''};
-  if(!S.ko.final)S.ko.final={t1:'',t2:''};
-  if(w('qf1'))S.ko.sf1.t1=w('qf1');if(w('qf3'))S.ko.sf1.t2=w('qf3');
-  if(w('qf2'))S.ko.sf2.t1=w('qf2');if(w('qf4'))S.ko.sf2.t2=w('qf4');
-  if(w('sf1'))S.ko.final.t1=w('sf1');if(w('sf2'))S.ko.final.t2=w('sf2');
+  // Always reset derived slots so stale data from old bracket logic doesn't linger
+  S.ko.sf1={t1:w('qf1')||'',t2:w('qf3')||''};
+  S.ko.sf2={t1:w('qf2')||'',t2:w('qf4')||''};
+  S.ko.final={t1:w('sf1')||'',t2:w('sf2')||''};
 }
 function autoFillQF(){
   S.koSnapshot=JSON.stringify(S.ko); // save for undo
@@ -2279,6 +2277,7 @@ function renderKnockoutAdmin(){
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="act-btn btn-autofill" data-action="autoFillQF">⚡ Auto-fill QF from Standings</button>
       ${S.koSnapshot?`<button class="act-btn btn-undo" data-action="undoAutoFill">↩ Undo Auto-fill</button>`:''}
+      <button class="act-btn" style="background:rgba(255,255,255,.07)" data-action="resyncBracket">↻ Re-sync SF/Final slots</button>
     </div>
   </div>
   <div class="ko-section-head">Quarter Finals — 5:30 PM</div>
@@ -2512,6 +2511,7 @@ function attachHandlers(){
       if(a==='undoResult')    {delete S.results[el.dataset.id];if(S.presentation.matchId===el.dataset.id)S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
       if(a==='savePlayers')   {S.playersDirty=false;saveNowFull();render();}
       if(a==='autoFillQF')    {autoFillQF();}
+      if(a==='resyncBracket') {propagateKOWinners();saveNowFull();render();}
       if(a==='undoAutoFill')  {if(S.koSnapshot){S.ko=JSON.parse(S.koSnapshot);S.koSnapshot=null;propagateKOWinners();saveNowFull();render();}}
       if(a==='resetTournament'){S.confirmReset=true;renderOverlays();}
       if(a==='cancelReset')   {S.confirmReset=false;renderOverlays();}
