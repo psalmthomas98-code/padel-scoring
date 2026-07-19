@@ -1485,7 +1485,8 @@ function startRealtime() {
     S.results=data.results||{};
     // Firebase drops null fields (adv, setWinner) — restore them so renderDisplay works correctly
     S.live=data.live ? Object.assign({setWinner:null,adv:null},data.live) : null;
-    S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames(); S.players=data.players||defaultPlayers();
+    S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames();
+    if(!S.playersDirty) S.players=data.players||defaultPlayers(); // don't overwrite unsaved edits
     S.presentation=data.presentation||{mode:'standard',matchId:''};
     if(!S.adminOpen) S.displayTab=data.displayTab||'groups';
     S.matchOrder=data.matchOrder||{};
@@ -1544,6 +1545,7 @@ const S = {
   koSnapshot:null,       // undo auto-fill QF
   fullSnapshot:null,     // undo full reset
   confirmReset:false,    // two-step reset confirm
+  playersDirty:false,    // unsaved player name edits in progress
 };
 const AUTH_KEY='padel_admin_v1';
 function checkPersistedAuth(serial){ if(localStorage.getItem(AUTH_KEY)===String(serial)) S.authed=true; }
@@ -1990,7 +1992,10 @@ function renderKODisplay(){
 // ── RENDER: ADMIN ─────────────────────────────────────────────────────────────
 function renderPlayersAdmin(){
   const colors=['#f46b1a','#1a65a3','#2db87a','#e05252','#f0b429','#7c3aed','#0891b2','#d97706'];
-  return Object.entries(GROUPS).map(([gk,g])=>`
+  return`<div style="position:sticky;top:0;z-index:10;background:var(--pitch);padding-bottom:12px;margin-bottom:4px">
+    <button id="players-save-btn" class="act-btn btn-save" data-action="savePlayers" style="width:100%;font-size:13px;padding:13px" ${S.playersDirty?'':'disabled'}>💾 Save Player Names</button>
+  </div>`+
+  Object.entries(GROUPS).map(([gk,g])=>`
   <div style="margin-bottom:24px">
     <div class="admin-group-info">${g.label} · ${g.date} · ${g.time}</div>
     <div class="player-grid">
@@ -2274,7 +2279,9 @@ function attachHandlers(){
         if(!S.players[gk]) S.players[gk]=defaultPlayers()[gk];
         if(!S.players[gk][ti]) S.players[gk][ti]={p1:'',p2:''};
         S.players[gk][ti][slot]=el.value;
-        scheduleSave();
+        // mark dirty so SSE doesn't overwrite and show save button
+        S.playersDirty=true;
+        document.getElementById('players-save-btn')?.removeAttribute('disabled');
       });
       return;
     }
@@ -2323,6 +2330,7 @@ function attachHandlers(){
       if(a==='showWinner')    {S.presentation={mode:'winner',matchId:el.dataset.id};saveNowFull();render();}
       if(a==='hideWinner')    {S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
       if(a==='undoResult')    {delete S.results[el.dataset.id];if(S.presentation.matchId===el.dataset.id)S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
+      if(a==='savePlayers')   {S.playersDirty=false;saveNowFull();render();}
       if(a==='autoFillQF')    {autoFillQF();}
       if(a==='undoAutoFill')  {if(S.koSnapshot){S.ko=JSON.parse(S.koSnapshot);S.koSnapshot=null;propagateKOWinners();saveNowFull();render();}}
       if(a==='resetTournament'){S.confirmReset=true;renderOverlays();}
