@@ -1372,6 +1372,79 @@ button:active, .atab:active, .dstab:active {
   .d-result-row:nth-child(odd) { border-right: 0; }
 }
 
+/* ── FULL-SIZE TABLES + OVERALL RANKINGS ─────────────────────────────────── */
+.d-stage-tabs { grid-template-columns: repeat(4,1fr); }
+.dstab { min-width: 94px; padding-inline: 11px; }
+#display-view.is-focus-view { grid-template-rows: auto minmax(0,1fr); }
+.d-full-zone {
+  min-height: 0;
+  padding: clamp(16px,2.2vw,30px) clamp(18px,4vw,64px) clamp(20px,3vw,42px);
+  overflow-y: auto;
+  scrollbar-color: rgba(244,107,26,.5) rgba(255,255,255,.04);
+}
+.d-full-shell { width: min(1500px,100%); margin: 0 auto; }
+.d-full-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:clamp(14px,2vh,22px); }
+.d-full-kicker { color:var(--fire); font:800 8px/1 Arial,sans-serif; letter-spacing:.28em; text-transform:uppercase; }
+.d-full-title { margin-top:7px; color:#fff; font:900 clamp(24px,3vw,43px)/.95 Impact,'Arial Narrow',sans-serif; letter-spacing:.09em; text-transform:uppercase; }
+.d-full-copy { max-width:500px; color:rgba(255,255,255,.38); font:700 9px/1.55 Arial,sans-serif; letter-spacing:.13em; text-align:right; text-transform:uppercase; }
+.d-full-groups { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.d-full-group {
+  min-width:0; overflow:hidden;
+  border:1px solid rgba(255,255,255,.1); border-top:2px solid var(--group-color,var(--fire));
+  background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.018)),rgba(9,6,4,.84);
+  box-shadow:0 18px 45px rgba(0,0,0,.2); backdrop-filter:blur(9px);
+}
+.d-full-group-head { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:55px; padding:10px 16px; border-bottom:1px solid rgba(255,255,255,.08); }
+.d-full-group-id { display:flex; align-items:center; gap:11px; }
+.d-full-group-letter { color:var(--group-color,var(--fire)); font:900 28px/1 Impact,'Arial Narrow',sans-serif; }
+.d-full-group-name { color:#fff; font:850 12px/1 Arial,sans-serif; letter-spacing:.14em; text-transform:uppercase; }
+.d-full-group-schedule { margin-top:5px; color:rgba(255,255,255,.32); font:700 7px/1 Arial,sans-serif; letter-spacing:.13em; text-transform:uppercase; }
+.d-full-progress { color:rgba(255,255,255,.36); font:800 8px/1 Arial,sans-serif; letter-spacing:.15em; text-align:right; text-transform:uppercase; }
+.d-full-table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+.d-full-table th { height:28px; padding:5px 9px; background:rgba(255,255,255,.025); color:rgba(255,255,255,.28); font:800 7px/1 Arial,sans-serif; letter-spacing:.13em; text-align:center; text-transform:uppercase; }
+.d-full-table th.team-col,.d-full-table td.team-col { text-align:left; }
+.d-full-table td { height:39px; padding:6px 9px; border-top:1px solid rgba(255,255,255,.055); color:rgba(255,255,255,.54); font-size:11px; font-weight:650; text-align:center; }
+.d-full-table td.team-col { color:rgba(255,255,255,.92); font-size:clamp(10px,1vw,14px); font-weight:800; }
+.d-full-table tr.is-qualified { background:linear-gradient(90deg,rgba(240,180,41,.09),transparent 70%); }
+.d-full-rank { width:34px; color:rgba(255,255,255,.34)!important; font:900 15px/1 Impact,'Arial Narrow',sans-serif!important; }
+.d-full-table tr.is-qualified .d-full-rank { color:var(--gold)!important; }
+.d-full-pts { color:var(--fire)!important; font:900 18px/1 Impact,'Arial Narrow',sans-serif!important; }
+.d-full-gd.pos { color:var(--win); }
+.d-full-gd.neg { color:var(--loss); }
+.d-rank-board { overflow:hidden; border:1px solid rgba(255,255,255,.1); border-top:2px solid var(--gold); background:rgba(9,6,4,.86); box-shadow:0 24px 70px rgba(0,0,0,.26); backdrop-filter:blur(10px); }
+.d-rank-board .d-full-table th { height:34px; }
+.d-rank-board .d-full-table td { height:clamp(31px,3.6vh,43px); }
+.d-overall-pos { width:56px; color:rgba(255,255,255,.52)!important; font:900 clamp(15px,1.5vw,22px)/1 Impact,'Arial Narrow',sans-serif!important; }
+.d-overall-pos.top-eight { color:var(--gold)!important; }
+.d-overall-team { display:flex; align-items:center; gap:10px; min-width:0; }
+.d-group-chip { display:grid; place-items:center; width:25px; height:20px; flex:0 0 auto; border:1px solid var(--chip-color); border-radius:3px; color:var(--chip-color); background:rgba(255,255,255,.025); font:900 9px/1 Arial,sans-serif; }
+.d-overall-team-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.d-seed-tag { display:inline-block; margin-left:7px; padding:3px 6px; border:1px solid rgba(240,180,41,.26); border-radius:99px; color:rgba(240,180,41,.82); font:800 6px/1 Arial,sans-serif; letter-spacing:.12em; text-transform:uppercase; vertical-align:middle; }
+
+@media (max-width: 1080px) {
+  .dstab { min-width:76px; font-size:8px; letter-spacing:.11em; }
+  .d-full-zone { padding-inline:18px; }
+}
+@media (max-width: 760px), (max-height: 560px) {
+  .d-stage-tabs { grid-template-columns:repeat(2,1fr); }
+  .dstab { min-width:0; }
+  #display-view.is-focus-view { height:auto; min-height:100dvh; grid-template-rows:auto auto; overflow:visible; }
+  .d-full-zone { overflow:visible; padding:18px 14px 28px; }
+  .d-full-heading { align-items:flex-start; flex-direction:column; gap:8px; }
+  .d-full-copy { text-align:left; }
+  .d-full-groups { grid-template-columns:1fr; }
+  .d-full-table th,.d-full-table td { padding-inline:6px; }
+  .d-hide-phone { display:none; }
+}
+@media (max-width: 430px) {
+  .d-full-group-head { padding-inline:11px; }
+  .d-full-table td.team-col { font-size:10px; }
+  .d-rank-board .d-full-table th,.d-rank-board .d-full-table td { padding-inline:4px; }
+  .d-overall-pos { width:34px; }
+  .d-group-chip { width:21px; }
+  .d-seed-tag { display:none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1776,10 +1849,12 @@ function renderDisplay(){
     const details=getCompletedMatchDetails(S.presentation.matchId);
     if(details) return renderWinnerDisplay(details);
   }
-  const liveTeams=getLiveTeams(), showKO=S.displayTab==='knockout';
+  const liveTeams=getLiveTeams(), activeTab=S.displayTab||'groups', showKO=activeTab==='knockout';
+  const isFocus=activeTab==='tables'||activeTab==='rankings';
+  const viewSub={groups:'Sat 18 July · Group Stage',knockout:'Sun 19 July · Knockout Stage',tables:'Full Group Standings',rankings:'Overall Tournament Rankings'}[activeTab]||'Tournament View';
   return`
 ${S.showTourPicker?renderTourPicker():''}
-<div id="display-view">
+<div id="display-view" class="${isFocus?'is-focus-view':''}">
   ${courtSVG()}
 
   <!-- Tournament broadcast banner -->
@@ -1789,14 +1864,16 @@ ${S.showTourPicker?renderTourPicker():''}
       <div class="d-brand-copy">
         <div class="d-banner-kicker"><span></span> Live Tournament</div>
         <div class="d-banner-title">Udaan Padel Open</div>
-        <div class="d-banner-sub">${showKO?'Sun 19 July · Knockout Stage':'Sat 18 July · Group Stage'}</div>
+        <div class="d-banner-sub">${viewSub}</div>
       </div>
     </div>
     <div class="d-banner-center">
       <div class="d-stage-label">Tournament View</div>
       <div class="d-stage-tabs">
-        <button class="dstab ${!showKO?'active':''}" data-action="dispTab" data-tab="groups"><span>01</span> Groups</button>
+        <button class="dstab ${activeTab==='groups'?'active':''}" data-action="dispTab" data-tab="groups"><span>01</span> Groups</button>
         <button class="dstab ${showKO?'active':''}" data-action="dispTab" data-tab="knockout"><span>02</span> Knockout</button>
+        <button class="dstab ${activeTab==='tables'?'active':''}" data-action="dispTab" data-tab="tables"><span>03</span> Tables</button>
+        <button class="dstab ${activeTab==='rankings'?'active':''}" data-action="dispTab" data-tab="rankings"><span>04</span> Rankings</button>
       </div>
     </div>
     <div class="d-banner-right">
@@ -1812,6 +1889,7 @@ ${S.showTourPicker?renderTourPicker():''}
     </div>
   </header>
 
+  ${isFocus?activeTab==='tables'?renderFullGroupTables():renderOverallRankings():`
   <!-- Live zone -->
   <div class="d-live-zone">
     <div class="d-live-board">
@@ -1837,6 +1915,7 @@ ${S.showTourPicker?renderTourPicker():''}
       ${Object.keys(GROUPS).map(k=>renderDisplayGroupCard(k)).join('')}
     </div>`}
   </div>
+  `}
 
 </div>
 `;
@@ -1957,6 +2036,48 @@ function renderDisplayGroupCard(gk){
   <div class="d-played">${played.length} / ${gm.length} played</div>
   ${resultsHtml?`<div class="d-results-head"><span>Match Results</span><span>${played.length} complete</span></div><div class="d-results-wrap">${resultsHtml}</div>`:''}
 </div>`;
+}
+
+function renderFullGroupTables(){
+  const cards=Object.keys(GROUPS).map(gk=>{
+    const g=GROUPS[gk],rows=getStandings(gk),played=MATCHES.filter(m=>m.group===gk&&S.results[m.id]).length;
+    return`<section class="d-full-group" style="--group-color:${g.color}">
+      <header class="d-full-group-head">
+        <div class="d-full-group-id"><div class="d-full-group-letter">${g.letter}</div><div><div class="d-full-group-name">${g.label}</div><div class="d-full-group-schedule">${g.date} · ${g.time}</div></div></div>
+        <div class="d-full-progress">${played} / 6<br>played</div>
+      </header>
+      <table class="d-full-table">
+        <thead><tr><th>#</th><th class="team-col">Team</th><th>MP</th><th>W</th><th>L</th><th>GW</th><th>GL</th><th>GD</th><th>Pts</th></tr></thead>
+        <tbody>${rows.map((r,i)=>{
+          const wins=r.pts/3,losses=r.mp-wins;
+          return`<tr class="${i<2?'is-qualified':''}"><td class="d-full-rank">${i<2?'Q':i+1}</td><td class="team-col">${r.team}</td><td>${r.mp}</td><td>${wins}</td><td>${losses}</td><td>${r.gw}</td><td>${r.gl}</td><td class="d-full-gd ${r.gd>0?'pos':r.gd<0?'neg':''}">${r.gd>0?'+':''}${r.gd}</td><td class="d-full-pts">${r.pts}</td></tr>`;
+        }).join('')}</tbody>
+      </table>
+    </section>`;
+  }).join('');
+  return`<main class="d-full-zone"><div class="d-full-shell">
+    <div class="d-full-heading"><div><div class="d-full-kicker">Group stage</div><h1 class="d-full-title">Full Group Tables</h1></div><div class="d-full-copy">Top two teams in each group qualify · Ranked by points, game difference, games won, then games lost</div></div>
+    <div class="d-full-groups">${cards}</div>
+  </div></main>`;
+}
+
+function getOverallRankings(){
+  return Object.keys(GROUPS).flatMap(gk=>getStandings(gk).map((r,groupRank)=>({...r,group:gk,groupRank})))
+    .sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gw-a.gw||a.gl-b.gl||a.team.localeCompare(b.team));
+}
+
+function renderOverallRankings(){
+  const rows=getOverallRankings();
+  return`<main class="d-full-zone"><div class="d-full-shell">
+    <div class="d-full-heading"><div><div class="d-full-kicker">Tournament leaderboard</div><h1 class="d-full-title">Overall Rankings</h1></div><div class="d-full-copy">All teams ranked together · Gold markers identify the eight group-stage qualifiers</div></div>
+    <div class="d-rank-board"><table class="d-full-table">
+      <thead><tr><th>Rank</th><th class="team-col">Team</th><th>Group</th><th>MP</th><th>W</th><th>L</th><th class="d-hide-phone">GW</th><th class="d-hide-phone">GL</th><th>GD</th><th>Pts</th></tr></thead>
+      <tbody>${rows.map((r,i)=>{
+        const g=GROUPS[r.group],qualified=r.groupRank<2,wins=r.pts/3,losses=r.mp-wins;
+        return`<tr class="${qualified?'is-qualified':''}"><td class="d-overall-pos ${qualified?'top-eight':''}">${String(i+1).padStart(2,'0')}</td><td class="team-col"><div class="d-overall-team"><span class="d-group-chip" style="--chip-color:${g.color}">${g.letter}</span><span class="d-overall-team-name">${r.team}${qualified?'<span class="d-seed-tag">Qualified</span>':''}</span></div></td><td>${g.letter}</td><td>${r.mp}</td><td>${wins}</td><td>${losses}</td><td class="d-hide-phone">${r.gw}</td><td class="d-hide-phone">${r.gl}</td><td class="d-full-gd ${r.gd>0?'pos':r.gd<0?'neg':''}">${r.gd>0?'+':''}${r.gd}</td><td class="d-full-pts">${r.pts}</td></tr>`;
+      }).join('')}</tbody>
+    </table></div>
+  </div></main>`;
 }
 
 function renderKODisplay(){
