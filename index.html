@@ -2298,10 +2298,13 @@ function renderKOAdminMatch(id,idx){
   let body='';
   if(isLive){
     const sd=L.setWinner!==null,gs=inlineGameScore(L),cu=S.liveHistory.length>0;
-    const statusColor=sd?'var(--gold)':L.deuce?'var(--loss)':'var(--fire)';
+    const bo2=isBestOf2(id);
+    const statusColor=sd?'var(--gold)':L.deuce||L.superTB?'var(--loss)':'var(--fire)';
+    const scoreLineGames=bo2&&L.superTB?'– &nbsp;–':`${L.games[0]} – ${L.games[1]}`;
     body=`<div class="live-scoring-ctrl">
       <div class="score-display">
-        <div class="score-games">${L.games[0]} – ${L.games[1]}</div>
+        ${bo2?`<div class="score-sets" style="font-size:18px;font-weight:800;color:var(--gold);letter-spacing:2px">Sets: ${L.sets[0]} – ${L.sets[1]}</div>`:''}
+        <div class="score-games">${scoreLineGames}</div>
         <div class="score-points" style="color:${statusColor}">${gs}</div>
       </div>
       <div class="point-btns">
