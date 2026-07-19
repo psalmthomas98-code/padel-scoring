@@ -1620,10 +1620,21 @@ function propagateKOWinners(){
 }
 function autoFillQF(){
   S.koSnapshot=JSON.stringify(S.ko); // save for undo
-  const seed=k=>{const st=getStandings(k);return[st[0].team,st[1].team];};
-  const[a1,a2]=seed('A'),[b1,b2]=seed('B'),[c1,c2]=seed('C'),[d1,d2]=seed('D');
-  S.ko.qf1={t1:a1,t2:d2};S.ko.qf2={t1:b1,t2:c2};
-  S.ko.qf3={t1:c1,t2:b2};S.ko.qf4={t1:d1,t2:a2};
+  // Collect top-2 from each group with their group-stage stats
+  const qualifiers=[];
+  for(const gk of Object.keys(GROUPS)){
+    const st=getStandings(gk);
+    if(st[0]) qualifiers.push({team:st[0].team,pts:st[0].pts,gd:st[0].gd,gw:st[0].gw});
+    if(st[1]) qualifiers.push({team:st[1].team,pts:st[1].pts,gd:st[1].gd,gw:st[1].gw});
+  }
+  // Rank all 8 by: Points → GD → GW
+  qualifiers.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gw-a.gw);
+  const t=qualifiers.map(q=>q.team);
+  // Seed bracket: 1v8, 2v7, 3v6, 4v5
+  S.ko.qf1={t1:t[0]||'',t2:t[7]||''};
+  S.ko.qf2={t1:t[1]||'',t2:t[6]||''};
+  S.ko.qf3={t1:t[2]||'',t2:t[5]||''};
+  S.ko.qf4={t1:t[3]||'',t2:t[4]||''};
   propagateKOWinners();saveNowFull();render();
 }
 
@@ -2101,7 +2112,7 @@ function renderKnockoutAdmin(){
   <div class="ko-admin-top">
     <div>
       <div class="admin-standings-title" style="margin-bottom:4px">Knockout Stage · Sun 19 July</div>
-      <div class="ko-seeding-note">Seeding: 1v8 · 2v7 · 3v6 · 4v5 (Group winners = Seeds 1–4)</div>
+      <div class="ko-seeding-note">Seeding: top 2 per group ranked by Pts → GD → GW · 1v8 · 2v7 · 3v6 · 4v5</div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="act-btn btn-autofill" data-action="autoFillQF">⚡ Auto-fill QF from Standings</button>
