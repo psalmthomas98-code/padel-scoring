@@ -2063,13 +2063,16 @@ function renderFullGroupTables(){
 
 function getOverallRankings(){
   return Object.keys(GROUPS).flatMap(gk=>getStandings(gk).map((r,groupRank)=>({...r,group:gk,groupRank})))
-    .sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gw-a.gw||a.gl-b.gl||a.team.localeCompare(b.team));
+    .sort((a,b)=>{
+      const aQualified=a.groupRank<2?1:0,bQualified=b.groupRank<2?1:0;
+      return b.pts-a.pts||b.gd-a.gd||b.gw-a.gw||a.gl-b.gl||bQualified-aQualified||a.team.localeCompare(b.team);
+    });
 }
 
 function renderOverallRankings(){
   const rows=getOverallRankings();
   return`<main class="d-full-zone"><div class="d-full-shell">
-    <div class="d-full-heading"><div><div class="d-full-kicker">Tournament leaderboard</div><h1 class="d-full-title">Overall Rankings</h1></div><div class="d-full-copy">All teams ranked together · Gold markers identify the eight group-stage qualifiers</div></div>
+    <div class="d-full-heading"><div><div class="d-full-kicker">Tournament leaderboard</div><h1 class="d-full-title">Overall Rankings</h1></div><div class="d-full-copy">All teams ranked together · Qualified teams rank first when every score tie-breaker is equal</div></div>
     <div class="d-rank-board"><table class="d-full-table">
       <thead><tr><th>Rank</th><th class="team-col">Team</th><th>Group</th><th>MP</th><th>W</th><th>L</th><th class="d-hide-phone">GW</th><th class="d-hide-phone">GL</th><th>GD</th><th>Pts</th></tr></thead>
       <tbody>${rows.map((r,i)=>{
