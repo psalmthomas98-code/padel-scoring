@@ -1472,11 +1472,16 @@ function startRealtime() {
   es.addEventListener('put',e=>{
     const msg=JSON.parse(e.data); if(!msg.data) return;
     if(S.live && S.adminOpen) return; // this device is actively scoring
+    const editingPlayers = S.adminOpen && S.adminTab==='players' && S.playersDirty;
     // Partial update from pushLive(): only the live subtree changed
     if(msg.path==='/live'){
       S.live=msg.data ? Object.assign({setWinner:null,adv:null},msg.data) : null;
       syncStatus='ok'; updateSyncDots();
-      try { document.getElementById('root').innerHTML=renderDisplay(); renderOverlays(); } catch(err){ console.error('SSE render error:',err); }
+      try {
+        document.getElementById('root').innerHTML=renderDisplay();
+        // Don't rebuild admin panel while user is actively editing player names
+        if(!editingPlayers) renderOverlays();
+      } catch(err){ console.error('SSE render error:',err); }
       return;
     }
     // Full update
@@ -1496,7 +1501,7 @@ function startRealtime() {
     syncStatus='ok'; updateSyncDots();
     try {
       document.getElementById('root').innerHTML=renderDisplay();
-      renderOverlays(); // renderOverlays calls attachHandlers() — do NOT call again
+      if(!editingPlayers) renderOverlays(); // don't disrupt active player name editing
     } catch(err) {
       console.error('SSE render error:',err.message,err.stack);
     }
@@ -2290,9 +2295,16 @@ function attachHandlers(){
         if(!S.players[gk]) S.players[gk]=defaultPlayers()[gk];
         if(!S.players[gk][ti]) S.players[gk][ti]={p1:'',p2:''};
         S.players[gk][ti][slot]=el.value;
-        // mark dirty so SSE doesn't overwrite and show save button
         S.playersDirty=true;
         document.getElementById('players-save-btn')?.removeAttribute('disabled');
+        // Auto-save 2s after last keystroke so names persist even without tapping Save
+        clearTimeout(S._playersSaveTimer);
+        S._playersSaveTimer=setTimeout(()=>{
+          if(!S.playersDirty) return;
+          S.playersDirty=false;
+          document.getElementById('players-save-btn')?.setAttribute('disabled','');
+          saveNowFull();
+        }, 2000);
       });
       return;
     }
