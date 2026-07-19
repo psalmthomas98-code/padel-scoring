@@ -1548,7 +1548,7 @@ function startRealtime() {
     const editingPlayers = S.adminOpen && S.adminTab==='players' && S.playersDirty;
     // Partial update from pushLive(): only the live subtree changed
     if(msg.path==='/live'){
-      S.live=msg.data ? Object.assign({setWinner:null,adv:null},msg.data) : null;
+      S.live=msg.data ? Object.assign({setWinner:null,adv:null,sets:[0,0],superTB:false,superTBPoints:[0,0]},msg.data) : null;
       syncStatus='ok'; updateSyncDots();
       try {
         document.getElementById('root').innerHTML=renderDisplay();
@@ -1562,7 +1562,7 @@ function startRealtime() {
     const data=msg.data;
     S.results=data.results||{};
     // Firebase drops null fields (adv, setWinner) — restore them so renderDisplay works correctly
-    S.live=data.live ? Object.assign({setWinner:null,adv:null},data.live) : null;
+    S.live=data.live ? Object.assign({setWinner:null,adv:null,sets:[0,0],superTB:false,superTBPoints:[0,0]},data.live) : null;
     S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames();
     if(!S.playersDirty) S.players=data.players||defaultPlayers(); // don't overwrite unsaved edits
     S.presentation=data.presentation||{mode:'standard',matchId:''};
@@ -1645,8 +1645,9 @@ function getTeam(gk,idx){
   }
   return (S.names[gk]&&S.names[gk][idx])||GROUPS[gk].teams[idx];
 }
+function isBestOf2(id) { return id==='sf1'||id==='sf2'||id==='final'; }
 function freshLive(id) {
-  return {matchId:id,games:[0,0],points:[0,0],deuce:false,adv:null,goldenPoint:false,tiebreak:false,tbPoints:[0,0],setWinner:null};
+  return {matchId:id,sets:[0,0],games:[0,0],points:[0,0],deuce:false,adv:null,goldenPoint:false,tiebreak:false,tbPoints:[0,0],superTB:false,superTBPoints:[0,0],setWinner:null};
 }
 
 // ── SCORING ───────────────────────────────────────────────────────────────────
@@ -1655,9 +1656,16 @@ function awardPoint(team) {
   S.liveHistory.push(JSON.stringify(S.live));
   if(S.liveHistory.length>50) S.liveHistory.shift();
   const L=S.live;
+  if(L.superTB) {
+    L.superTBPoints[team]++;
+    if(L.superTBPoints[team]>=7&&L.superTBPoints[team]-L.superTBPoints[1-team]>=2){
+      L.sets[team]++;L.setWinner=team;
+    }
+    saveNow();render();return;
+  }
   if(L.tiebreak) {
     L.tbPoints[team]++;
-    if(L.tbPoints[team]>=7&&L.tbPoints[team]-L.tbPoints[1-team]>=2){L.games[team]++;L.setWinner=team;}
+    if(L.tbPoints[team]>=7&&L.tbPoints[team]-L.tbPoints[1-team]>=2){winSetGame(team);}
     saveNow();render();return;
   }
   if(L.deuce) {
@@ -1677,9 +1685,18 @@ function winGame(team) {
   L.games[team]++;L.points=[0,0];L.deuce=false;L.adv=null;L.goldenPoint=false;L.tiebreak=false;L.tbPoints=[0,0];
   const[g0,g1]=L.games,max=Math.max(g0,g1);
   if(max>=6){
-    if(max-Math.min(g0,g1)>=2&&max<=7){L.setWinner=g0>g1?0:1;return;}
+    if(max-Math.min(g0,g1)>=2&&max<=7){winSetGame(team);return;}
     if(g0===6&&g1===6){L.tiebreak=true;L.tbPoints=[0,0];}
   }
+}
+function winSetGame(team) {
+  const L=S.live;
+  if(!isBestOf2(L.matchId)){L.setWinner=team;return;}
+  // best-of-2: track sets
+  L.sets[team]++;
+  L.games=[0,0];L.points=[0,0];L.deuce=false;L.adv=null;L.goldenPoint=false;L.tiebreak=false;L.tbPoints=[0,0];
+  if(L.sets[team]===2){L.setWinner=team;return;}
+  if(L.sets[0]===1&&L.sets[1]===1){L.superTB=true;L.superTBPoints=[0,0];}
 }
 function undoPoint() { if(!S.liveHistory.length)return; S.live=JSON.parse(S.liveHistory.pop()); saveNow();render(); }
 
@@ -1719,6 +1736,7 @@ function autoFillQF(){
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function inlineGameScore(L){
   if(L.setWinner!==null)return'–';
+  if(L.superTB)return`STB ${L.superTBPoints[0]}–${L.superTBPoints[1]}`;
   if(L.tiebreak)return`TB ${L.tbPoints[0]}–${L.tbPoints[1]}`;
   if(L.deuce){if(L.goldenPoint)return'GOLDEN';return L.adv!==null?'ADV':'Deuce';}
   return`${POINT_LABELS[L.points[0]]}–${POINT_LABELS[L.points[1]]}`;
@@ -1926,15 +1944,23 @@ function renderDisplayLiveBoard(liveTeams){
   const p1=t1.split(' & '),p2=t2.split(' & ');
   const setDone=L.setWinner!==null;
   let centerHtml='';
+  const bo2=isBestOf2(L.matchId);
   if(setDone){
     const winnerNames=L.setWinner===0?p1:p2;
-    centerHtml=`<div class="set-won-moment" role="status" aria-label="Set won by ${winnerNames.join(' and ')}.">
+    centerHtml=`<div class="set-won-moment" role="status" aria-label="Match won by ${winnerNames.join(' and ')}.">
       <div class="set-won-emblem" aria-hidden="true"><span>✓</span></div>
       <div class="set-won-copy">
         <div class="set-won-kicker">Match Complete</div>
-        <div class="set-won-title">Set Won</div>
+        <div class="set-won-title">${bo2?'Match Won':'Set Won'}</div>
         <div class="set-won-names">${winnerNames.map(n=>`<span>${n}</span>`).join('<b>&amp;</b>')}</div>
       </div>
+    </div>`;
+  } else if(L.superTB){
+    centerHtml=`<div class="d-point-label">SUPER TIEBREAK</div>
+    <div class="d-point-row">
+      <div class="d-point-num tb">${L.superTBPoints[0]}</div>
+      <div class="d-point-dash">–</div>
+      <div class="d-point-num tb">${L.superTBPoints[1]}</div>
     </div>`;
   } else if(L.tiebreak){
     centerHtml=`<div class="d-point-label">TIEBREAK</div>
@@ -1988,11 +2014,17 @@ function renderDisplayLiveBoard(liveTeams){
   <div class="d-team-block left">${p1.map(n=>`<div class="d-team-player">${n}</div>`).join('')}</div>
   <div class="d-score-center">
     ${centerHtml}
+    ${bo2?`<div class="d-game-row">
+      <div class="d-game-label">SETS</div>
+      <div class="d-game-num">${L.sets[0]}</div>
+      <div class="d-game-dash">–</div>
+      <div class="d-game-num">${L.sets[1]}</div>
+    </div>`:''}
     <div class="d-game-row">
       <div class="d-game-label">GAMES</div>
-      <div class="d-game-num">${L.games[0]}</div>
+      <div class="d-game-num">${L.superTB?'–':L.games[0]}</div>
       <div class="d-game-dash">–</div>
-      <div class="d-game-num">${L.games[1]}</div>
+      <div class="d-game-num">${L.superTB?'–':L.games[1]}</div>
     </div>
   </div>
   <div class="d-team-block right">${p2.map(n=>`<div class="d-team-player">${n}</div>`).join('')}</div>
@@ -2090,8 +2122,9 @@ function renderKODisplay(){
     const winner=isDone?(res.s1>res.s2?t1:t2):null;
     const isReady=!isLive&&!isDone&&!!t1&&!!t2;
     const state=isLive?'Live':isDone?'Complete':isReady?'Ready':'Awaiting teams';
-    const score1=isLive?S.live.games[0]:isDone?res.s1:'—';
-    const score2=isLive?S.live.games[1]:isDone?res.s2:'—';
+    const bo2=isBestOf2(id);
+    const score1=isLive?(bo2?S.live.sets[0]:S.live.games[0]):isDone?res.s1:'—';
+    const score2=isLive?(bo2?S.live.sets[1]:S.live.games[1]):isDone?res.s2:'—';
     const finalClass=id==='final'?' d-ko-final-card':'';
     return`<article class="d-ko-card${finalClass} ${isLive?'is-live':isDone?'is-done':isReady?'is-ready':'is-waiting'}">
       <div class="d-ko-card-top"><div class="d-ko-label">${meta.label}</div><div class="d-ko-state"><i class="d-ko-state-dot"></i>${state}</div></div>
@@ -2495,7 +2528,7 @@ function attachHandlers(){
         }
       }
       if(a==='koGoLive')      {S.live=freshLive(el.dataset.id);S.liveHistory=[];S.presentation={mode:'standard',matchId:''};saveNowFull();render();}
-      if(a==='koSave')        {S.results[el.dataset.id]={s1:S.live.games[0],s2:S.live.games[1]};S.live=null;S.liveHistory=[];propagateKOWinners();saveNowFull();render();}
+      if(a==='koSave')        {const _id=el.dataset.id;S.results[_id]=isBestOf2(_id)?{s1:S.live.sets[0],s2:S.live.sets[1]}:{s1:S.live.games[0],s2:S.live.games[1]};S.live=null;S.liveHistory=[];propagateKOWinners();saveNowFull();render();}
       if(a==='koUndoResult')  {delete S.results[el.dataset.id];if(S.presentation.matchId===el.dataset.id)S.presentation={mode:'standard',matchId:''};propagateKOWinners();saveNowFull();render();}
     });
   });
@@ -2536,7 +2569,7 @@ function renderOverlays(){
   const data=await pullFromServer();
   if(data){
     S.results=data.results||{};
-    S.live=data.live ? Object.assign({setWinner:null,adv:null},data.live) : null;
+    S.live=data.live ? Object.assign({setWinner:null,adv:null,sets:[0,0],superTB:false,superTBPoints:[0,0]},data.live) : null;
     S.ko=data.ko||freshKO(); S.sponsors=data.sponsors||[]; S.names=data.names||defaultNames();
     S.players=data.players||defaultPlayers(); S.presentation=data.presentation||{mode:'standard',matchId:''};
     S.displayTab=data.displayTab||'groups'; S.matchOrder=data.matchOrder||{};
